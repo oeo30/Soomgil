@@ -3,11 +3,11 @@ import geopandas as gpd
 import pandas as pd
 import os
 
-data_dir = "path/test_seyeon"
+data_dir = "data/processed/"
 # 1) 데이터 읽기
 
-nodes_df = pd.read_csv("path/test_seyeon/nodes.csv")
-edges_gdf = gpd.read_file("path/test_seyeon/edges.geojson")
+nodes_df = pd.read_csv("data/processed/nodes.csv")
+edges_gdf = gpd.read_file("data/processed/edges.geojson")
 
 # 2) 지도 중심 좌표
 center_lat = nodes_df["lat"].mean()

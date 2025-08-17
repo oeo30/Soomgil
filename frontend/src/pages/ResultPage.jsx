@@ -1,58 +1,49 @@
-import { useMemo, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useSelection } from "../context/SelectionContext.jsx";
-import RouteMap from "../components/RouteMap.jsx";
-import AudioPlayer from "../components/AudioPlayer.jsx";
-import { buildMockRoute } from "../utils/mockRoute.js";
+import { useMemo, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useSelection } from '../context/SelectionContext.jsx'
+import RouteMap from '../components/RouteMap.jsx'
+import AudioPlayer from '../components/AudioPlayer.jsx'
+import { buildMockPath } from '../utils/mockRoute.js'
 
 export default function ResultPage() {
-  const nav = useNavigate();
-  const { startLocation, duration, canProceed } = useSelection();
+  const nav = useNavigate()
+  const { season, length, structure, canProceed } = useSelection()
 
-  // 만약 조건이 안 채워졌는데 바로 /result로 들어온 경우 → 홈으로 돌려보내기
+  // 잘못된 진입 방지
   useEffect(() => {
-    if (!canProceed) nav("/", { replace: true });
-  }, [canProceed, nav]);
+    if (!canProceed) nav('/', { replace: true })
+  }, [canProceed, nav])
 
-  // 목업 경로 생성 (시작 위치 + 소요시간 기반)
-  const pathLatLngs = useMemo(() => {
-    return buildMockRoute({ startLocation, duration });
-  }, [startLocation, duration]);
+  const pathLatLngs = useMemo(
+    () => buildMockPath({ season, length, structure }),
+    [season, length, structure]
+  )
 
-  // 설명 문구
-  const description = `출발지: ${
-    startLocation ? `${startLocation.lat.toFixed(5)}, ${startLocation.lng.toFixed(5)}` : "미지정"
-  }
-소요 시간: ${duration}분
-완만한 보행로와 휴식 포인트를 고려해 추천된 산책 경로입니다.`;
+  const description = `선택한 조건(${season ?? '-'} · ${length ?? '-'} · ${structure ?? '-'})에 맞춘 추천 경로입니다.
+완만한 구간과 휴식 포인트를 고려했어요. 안전한 보행 환경 중심으로 안내합니다.`
 
   return (
     <div style={styles.page}>
-      <h1 style={styles.title}>추천 산책 경로</h1>
+      <h2 style={styles.title}>맞춤 경로</h2>
 
-      {/* 지도 */}
       <RouteMap pathLatLngs={pathLatLngs} />
 
-      {/* 경로 설명 */}
       <div style={{ marginTop: 20 }}>
-        <h2 style={styles.subtitle}>경로 설명</h2>
-        <p style={styles.text}>{description}</p>
+        <h3>1. 경로 설명</h3>
+        <p style={styles.desc}>{description}</p>
       </div>
 
-      {/* 음악 추천 */}
-      <div style={{ marginTop: 20 }}>
-        <h2 style={styles.subtitle}>추천 음악 🎵</h2>
+      <div style={{ marginTop: 16 }}>
+        <h3>2. 생성된 노래</h3>
+        {/* public 폴더에 sample.mp3를 두면 /sample.mp3 로 접근 가능 */}
         <AudioPlayer src="/sample.mp3" />
       </div>
     </div>
-  );
+  )
 }
 
 const styles = {
-  page: { maxWidth: 720, margin: "32px auto", padding: 20 },
-  title: { fontSize: 28, marginBottom: 16, textAlign: "center" },
-  subtitle: { fontSize: 20, marginBottom: 8 },
-  text: { whiteSpace: "pre-line", lineHeight: 1.6 },
-};
-
-
+  page: { maxWidth: 720, margin: '32px auto', padding: 20 },
+  title: { marginBottom: 12 },
+  desc: { lineHeight: 1.6, whiteSpace: 'pre-line' }
+}

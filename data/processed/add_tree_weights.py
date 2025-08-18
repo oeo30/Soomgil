@@ -1,6 +1,5 @@
 import pandas as pd
 import geopandas as gpd
-from shapely.geometry import Point
 
 # -------------------
 # 1) 데이터 불러오기
@@ -8,8 +7,8 @@ from shapely.geometry import Point
 nodes_df = pd.read_csv("nodes.csv")
 edges_gdf = gpd.read_file("edges.geojson")
 
-tree_df = pd.read_csv("tree.csv", encoding="cp949")
-park_tree_df = pd.read_csv("park_tree.csv", encoding="cp949")
+tree_df = pd.read_csv("../raw/ddm-street-tree.csv")
+park_tree_df = pd.read_csv("../raw/ddm-park-tree.csv")
 
 # -------------------
 # 2) GeoDataFrame 변환

@@ -11,7 +11,7 @@ NODE_ADDED_PATH = "data/raw/nodes_added.csv"
 
 # 전역 데이터프레임
 df_nodes = None  # 기본 노드 + 새 노드 포함된 데이터
-
+df_base = pd.read_csv(NODE_PATH)
 
 def load_nodes(path=NODE_PATH):
     return pd.read_csv(path)
@@ -28,9 +28,9 @@ def save_added_node(new_node):
 
 
 def make_map():
+    global df_base
+
     """기본 노드 = 파란색, 추가 노드 = 빨간색"""
-    # 기본 노드
-    df_base = load_nodes(NODE_PATH)
 
     # 추가 노드 (없으면 빈 DF)
     if os.path.exists(NODE_ADDED_PATH):
@@ -38,11 +38,7 @@ def make_map():
     else:
         df_added = pd.DataFrame(columns=["osmid", "lat", "lon"])
 
-    # 지도 중심
-    if len(df_added) > 0:
-        center = [df_added["lat"].mean(), df_added["lon"].mean()]
-    else:
-        center = [df_base["lat"].mean(), df_base["lon"].mean()]
+    center = [df_base["lat"].mean(), df_base["lon"].mean()]
 
     m = folium.Map(location=center, zoom_start=14)
 
@@ -88,7 +84,7 @@ def index():
 
     # 처음 접근 시 기본 노드만 로드
     if df_nodes is None:
-        df_nodes = load_nodes(NODE_PATH)
+        df_nodes = df_base
 
     # POST 요청 (노드 추가)
     if request.method == "POST":

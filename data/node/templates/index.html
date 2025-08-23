@@ -32,6 +32,7 @@
         // folium이 렌더링한 지도 iframe 찾기
         let mapElement = document.querySelector("#map iframe");
 
+    
         mapElement.addEventListener("load", function () {
             let innerDoc = mapElement.contentDocument || mapElement.contentWindow.document;
             let leafletMap = innerDoc.querySelector(".leaflet-container");

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Folium Map</title>
+    <style>
+        #map {
+            width: 100%;
+            height: 600px;
+        }
+    </style>
+</head>
+<body>
+    <h2>노드 추가 지도</h2>
+
+    <!-- 지도 -->
+    <div id="map">{{ map_html|safe }}</div>
+
+    <!-- 좌표 저장 폼 -->
+    <form method="POST" action="/" id="coordForm">
+        <input type="hidden" name="lat" id="lat">
+        <input type="hidden" name="lon" id="lon">
+        <button type="submit">저장</button>
+    </form>
+
+    <!-- 지도 새로고침 버튼 -->
+    <form method="GET" action="/refresh">
+        <button type="submit">지도 새로고침</button>
+    </form>
+
+    <script>
+        // folium이 렌더링한 지도 iframe 찾기
+        let mapElement = document.querySelector("#map iframe");
+
+        mapElement.addEventListener("load", function () {
+            let innerDoc = mapElement.contentDocument || mapElement.contentWindow.document;
+            let leafletMap = innerDoc.querySelector(".leaflet-container");
+
+            // 지도 클릭 시 좌표 hidden input에 저장
+            leafletMap.addEventListener("click", function () {
+                let popupContent = innerDoc.querySelector(".leaflet-popup-content");
+                if (popupContent) {
+                    let text = popupContent.innerText;  // "Latitude: xx   Longitude: yy"
+                    let parts = text.match(/Latitude:\s*([0-9\.\-]+)\s*Longitude:\s*([0-9\.\-]+)/);
+
+                    if (parts) {
+                        document.getElementById("lat").value = parts[1];
+                        document.getElementById("lon").value = parts[2];
+                        console.log("좌표 저장됨:", parts[1], parts[2]);
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

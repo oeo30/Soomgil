@@ -4,8 +4,8 @@ import geopandas as gpd
 # -------------------
 # 1) 데이터 불러오기
 # -------------------
-nodes_df = pd.read_csv("nodes.csv")
-edges_gdf = gpd.read_file("edges.geojson")
+nodes_df = pd.read_csv("../raw/nodes.csv")
+edges_gdf = gpd.read_file("../raw/edges.geojson")
 
 tree_df = pd.read_csv("../raw/ddm-street-tree.csv")
 park_tree_df = pd.read_csv("../raw/ddm-park-tree.csv")

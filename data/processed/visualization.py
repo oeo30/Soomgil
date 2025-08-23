@@ -3,18 +3,18 @@ import geopandas as gpd
 import pandas as pd
 
 # 1) 데이터 읽기
-nodes_df = pd.read_csv("/Users/minju/Practice/2025_K_HTML_Hackathon/Soomgil/path/test_minju/nodes.csv")
-edges_gdf = gpd.read_file("/Users/minju/Practice/2025_K_HTML_Hackathon/Soomgil/path/test_minju/edges.geojson")
+nodes_df = pd.read_csv("../raw/nodes.csv")
+edges_gdf = gpd.read_file("../raw/edges.geojson")
 
 # tree.csv 읽기
 tree_df = pd.read_csv(
-    "/Users/minju/Practice/2025_K_HTML_Hackathon/Soomgil/path/test_minju/tree.csv",
+    "../raw/tree.csv",
     encoding="cp949"
 )
 
 # park_tree.csv 읽기
 park_tree_df = pd.read_csv(
-    "/Users/minju/Practice/2025_K_HTML_Hackathon/Soomgil/path/test_minju/park_tree.csv",
+    "../raw/park_tree.csv",
     encoding="cp949"
 )
 

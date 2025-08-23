@@ -2,7 +2,6 @@ from flask import Flask, render_template, request, redirect, url_for, jsonify
 import folium
 import pandas as pd
 import os
-import json
 
 app = Flask(__name__)
 
@@ -11,25 +10,20 @@ NODE_PATH = "data/raw/nodes.csv"
 NODE_ADDED_PATH = "data/raw/nodes_added.csv"
 
 # 전역 데이터프레임
-df_nodes = None  # 기본 노드 + 새 노드 포함된 데이터
+df_nodes = None  # 기본 노드 + 추가된 노드 저장할 변수
 df_base = pd.read_csv(NODE_PATH)
 
 def load_nodes(path=NODE_PATH):
     return pd.read_csv(path)
 
-
 def save_added_nodes(new_nodes):
     """여러 노드를 nodes_added.csv에 append"""
-    df_new = pd.DataFrame(new_nodes, columns=["osmid", "lat", "lon"])
-
     if os.path.exists(NODE_ADDED_PATH):
-        df_old = pd.read_csv(NODE_ADDED_PATH)
-        df_all = pd.concat([df_old, df_new], ignore_index=True)
+        df_added = pd.read_csv(NODE_ADDED_PATH)
+        df_added = pd.concat([df_added, pd.DataFrame(new_nodes)], ignore_index=True)
     else:
-        df_all = df_new
-
-    df_all.to_csv(NODE_ADDED_PATH, index=False)
-
+        df_added = pd.DataFrame(new_nodes)
+    df_added.to_csv(NODE_ADDED_PATH, index=False)
 
 
 def make_map():

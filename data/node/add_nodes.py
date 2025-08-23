@@ -1,7 +1,8 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 import folium
 import pandas as pd
 import os
+import json
 
 app = Flask(__name__)
 
@@ -17,14 +18,18 @@ def load_nodes(path=NODE_PATH):
     return pd.read_csv(path)
 
 
-def save_added_node(new_node):
-    """추가된 노드를 nodes_added.csv에만 저장"""
+def save_added_nodes(new_nodes):
+    """여러 노드를 nodes_added.csv에 append"""
+    df_new = pd.DataFrame(new_nodes, columns=["osmid", "lat", "lon"])
+
     if os.path.exists(NODE_ADDED_PATH):
-        df_added = pd.read_csv(NODE_ADDED_PATH)
-        df_added = pd.concat([df_added, pd.DataFrame([new_node])], ignore_index=True)
+        df_old = pd.read_csv(NODE_ADDED_PATH)
+        df_all = pd.concat([df_old, df_new], ignore_index=True)
     else:
-        df_added = pd.DataFrame([new_node])
-    df_added.to_csv(NODE_ADDED_PATH, index=False)
+        df_all = df_new
+
+    df_all.to_csv(NODE_ADDED_PATH, index=False)
+
 
 
 def make_map():
@@ -104,7 +109,7 @@ def index():
         df_nodes = pd.concat([df_nodes, pd.DataFrame([new_node])], ignore_index=True)
 
         # 새 노드만 별도 저장
-        save_added_node(new_node)
+        save_added_nodes(new_node)
 
         print("새로운 노드를 추가했습니다:", new_node)
         return redirect(url_for("index"))
@@ -112,6 +117,37 @@ def index():
     # 지도 생성 (기본 + 추가)
     map_html = make_map()
     return render_template("index.html", map_html=map_html)
+
+@app.route("/save_nodes", methods=["POST"])
+def save_nodes():
+    global df_nodes
+
+    data = request.get_json()
+    new_nodes = data.get("nodes", [])
+
+    if not new_nodes:
+        return jsonify({"status": "no nodes received"})
+
+    # osmid 자동 증가
+    max_osmid = int(df_base["osmid"].max())
+    if os.path.exists(NODE_ADDED_PATH):
+        df_added = pd.read_csv(NODE_ADDED_PATH)
+        if not df_added.empty:
+            max_osmid = max(max_osmid, int(df_added["osmid"].max()))
+
+    processed = []
+    for node in new_nodes:
+        max_osmid += 1
+        processed.append({
+            "osmid": max_osmid,
+            "lat": float(node["lat"]),
+            "lon": float(node["lon"])
+        })
+
+    # CSV에 저장
+    save_added_nodes(processed)
+
+    return jsonify({"status": "success", "saved": processed})
 
 
 @app.route("/refresh", methods=["GET"])

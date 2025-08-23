@@ -29,29 +29,53 @@
     </form>
 
     <script>
-        // folium이 렌더링한 지도 iframe 찾기
+        let pendingNodes = [];  // 클릭한 좌표들을 임시 저장
+
         let mapElement = document.querySelector("#map iframe");
 
-    
         mapElement.addEventListener("load", function () {
             let innerDoc = mapElement.contentDocument || mapElement.contentWindow.document;
             let leafletMap = innerDoc.querySelector(".leaflet-container");
 
-            // 지도 클릭 시 좌표 hidden input에 저장
+            // 지도 클릭 시 좌표 배열에 저장
             leafletMap.addEventListener("click", function () {
                 let popupContent = innerDoc.querySelector(".leaflet-popup-content");
                 if (popupContent) {
-                    let text = popupContent.innerText;  // "Latitude: xx   Longitude: yy"
+                    let text = popupContent.innerText;  
                     let parts = text.match(/Latitude:\s*([0-9\.\-]+)\s*Longitude:\s*([0-9\.\-]+)/);
 
                     if (parts) {
-                        document.getElementById("lat").value = parts[1];
-                        document.getElementById("lon").value = parts[2];
-                        console.log("좌표 저장됨:", parts[1], parts[2]);
+                        let lat = parts[1];
+                        let lon = parts[2];
+                        pendingNodes.push({lat: lat, lon: lon});
+                        console.log("좌표 추가됨:", lat, lon);
+                        console.log("현재 pendingNodes 배열:", pendingNodes);  // ✅ 누적된 좌표 배열 출력
                     }
                 }
             });
         });
+
+        // 저장 버튼 눌렀을 때 서버로 한번에 전송
+        document.getElementById("coordForm").addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            if (pendingNodes.length === 0) {
+                alert("저장할 노드가 없습니다!");
+                return;
+            }
+
+            fetch("/save_nodes", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({nodes: pendingNodes})
+            }).then(res => res.json())
+            .then(data => {
+                console.log("저장 완료:", data);
+                pendingNodes = []; // 클라이언트 버퍼 초기화
+                location.reload(); // 새로고침
+            });
+        });
     </script>
+
 </body>
 </html>

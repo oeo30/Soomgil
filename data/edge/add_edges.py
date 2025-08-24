@@ -10,9 +10,9 @@ app = Flask(__name__)
 
 # 파일 경로
 NODE_PATH = "data/raw/nodes.csv"
-NODE_ADDED_PATH = "data/raw/nodes_added.csv"
+NODE_ADDED_PATH = "data/node/nodes_added.csv"
 EDGE_PATH = "data/raw/edges.geojson"
-EDGE_ADDED_PATH = "data/raw/edges_added.geojson"
+EDGE_ADDED_PATH = "data/edge/edges_added.geojson"
 
 # 기본 데이터 불러오기
 node_base = pd.read_csv(NODE_PATH)
@@ -53,7 +53,6 @@ def make_map():
         folium.CircleMarker(
             location=[row.lat, row.lon],
             radius=3, color="blue", fill=True, fill_opacity=0.7,
-            popup=f"osmid: {row.osmid}",
             tooltip=str(row.osmid)
         ).add_to(m)
 
@@ -64,7 +63,6 @@ def make_map():
             folium.CircleMarker(
                 location=[row.lat, row.lon],
                 radius=3, color="red", fill=True, fill_opacity=0.7,
-                popup=f"osmid: {row.osmid}",
                 tooltip=str(row.osmid)
             ).add_to(m)
 
@@ -75,14 +73,14 @@ def make_map():
             style_function=lambda _feat: {"color": "#0079cf", "weight": 3, "opacity": 0.8},
         ).add_to(m)
 
-    # 추가된 edges (주황색)
+    # 추가된 edges (빨간색)
     if os.path.exists(EDGE_ADDED_PATH):
-        edges_added = gpd.read_file("data/raw/edges_added.geojson")
+        edges_added = gpd.read_file(EDGE_ADDED_PATH)
         
         folium.GeoJson(
             data=edges_added.to_json(),
             name="edges_added",
-            style_function=lambda _feat: {"color": "#ff9524", "weight": 3, "opacity": 0.8},
+            style_function=lambda _feat: {"color": "#bf00ff", "weight": 4, "opacity": 0.8},
         ).add_to(m)
 
     map_name = m.get_name()

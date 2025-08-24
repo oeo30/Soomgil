@@ -31,10 +31,14 @@
             let lat = e.latlng.lat.toFixed(7);
             let lon = e.latlng.lng.toFixed(7);
 
-            L.popup()
-                .setLatLng(e.latlng)
-                .setContent("Lat: " + lat + "<br>Lon: " + lon)
-                .openOn(map);
+            // 지도에 바로 점 추가
+            L.circleMarker([lat, lon], {
+                radius: 2,
+                color: "red",
+                fill: true,
+                fillOpacity: 0.7
+            }).addTo(map)
+            .bindPopup("Lat: " + lat + "<br>Lon: " + lon);
 
             pendingNodes.push({lat: lat, lon: lon});
             console.log("좌표 추가됨:", lat, lon);

@@ -27,7 +27,6 @@
     <script>
         let pendingNodes = [];
 
-        // 이제 iframe이 없으므로 바로 window.map 사용 가능
         map.on("click", function (e) {
             let lat = e.latlng.lat.toFixed(7);
             let lon = e.latlng.lng.toFixed(7);
@@ -59,7 +58,7 @@
             .then(data => {
                 console.log("저장 완료:", data);
                 pendingNodes = [];
-                location.reload();
+                location.reload(); // 페이지 새로고침
             });
         });
     </script>

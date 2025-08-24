@@ -108,9 +108,7 @@ def index():
     return render_template("index.html", map_html=map_html)
 
 @app.route("/save_nodes", methods=["POST"])
-def save_nodes():
-    global df_nodes
-
+def save_nodes_api():
     data = request.get_json()
     new_nodes = data.get("nodes", [])
 

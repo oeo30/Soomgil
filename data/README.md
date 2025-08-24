@@ -20,7 +20,6 @@
   - `polygon/`
     - 동별/공원별 폴리곤 데이터, 태그 추가, 지도 시각화 결과
     - `polygon_data/`: 산/공원/강 영역 GeoJSON
-    - `tag_data/`: 노드/수목 태그 부여 결과
     - 여러 Jupyter 노트북(`*.ipynb`), HTML 지도 결과물
     - `nodes.csv`: 폴리곤 내 노드 데이터
   - `tree-to-edge/`

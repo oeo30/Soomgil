@@ -2,19 +2,20 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Folium Map</title>
+    <title>노드 추가 지도</title>
     <style>
-        #map {
-            width: 100%;
-            height: 600px;
+        [id^=map_] {
+            display: block;   /* 기본값 inline-block일 수 있으니 block으로 */
+            margin: 20px auto; /* 위아래 20px, 좌우 자동 → 가운데 정렬 */
+        }
+        #coordForm {
+            text-align: center;
         }
     </style>
 </head>
 <body>
-    <h2>노드 추가 지도</h2>
-
-    <!-- 지도 -->
-    <div id="map">{{ map_html|safe }}</div>
+    <!-- folium이 생성한 leaflet 코드 직접 삽입 -->
+    {{ map_html|safe }}
 
     <!-- 좌표 저장 폼 -->
     <form method="POST" action="/" id="coordForm">
@@ -24,33 +25,23 @@
     </form>
 
     <script>
-        let pendingNodes = [];  // 클릭한 좌표들을 임시 저장
+        let pendingNodes = [];
 
-        let mapElement = document.querySelector("#map iframe");
+        // 이제 iframe이 없으므로 바로 window.map 사용 가능
+        map.on("click", function (e) {
+            let lat = e.latlng.lat.toFixed(7);
+            let lon = e.latlng.lng.toFixed(7);
 
-        mapElement.addEventListener("load", function () {
-            let innerDoc = mapElement.contentDocument || mapElement.contentWindow.document;
-            let leafletMap = innerDoc.querySelector(".leaflet-container");
+            L.popup()
+                .setLatLng(e.latlng)
+                .setContent("Lat: " + lat + "<br>Lon: " + lon)
+                .openOn(map);
 
-            // 지도 클릭 시 좌표 배열에 저장
-            leafletMap.addEventListener("click", function () {
-                let popupContent = innerDoc.querySelector(".leaflet-popup-content");
-                if (popupContent) {
-                    let text = popupContent.innerText;  
-                    let parts = text.match(/Latitude:\s*([0-9\.\-]+)\s*Longitude:\s*([0-9\.\-]+)/);
-
-                    if (parts) {
-                        let lat = parts[1];
-                        let lon = parts[2];
-                        pendingNodes.push({lat: lat, lon: lon});
-                        console.log("좌표 추가됨:", lat, lon);
-                        console.log("현재 pendingNodes 배열:", pendingNodes);  // 누적된 좌표 배열 출력
-                    }
-                }
-            });
+            pendingNodes.push({lat: lat, lon: lon});
+            console.log("좌표 추가됨:", lat, lon);
+            console.log("현재 pendingNodes 배열:", pendingNodes);
         });
 
-        // 저장 버튼 눌렀을 때 서버로 한번에 전송
         document.getElementById("coordForm").addEventListener("submit", function (e) {
             e.preventDefault();
 
@@ -63,14 +54,14 @@
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
                 body: JSON.stringify({nodes: pendingNodes})
-            }).then(res => res.json())
+            })
+            .then(res => res.json())
             .then(data => {
                 console.log("저장 완료:", data);
-                pendingNodes = []; // 클라이언트 버퍼 초기화
-                location.reload(); // 새로고침
+                pendingNodes = [];
+                location.reload();
             });
         });
     </script>
-
 </body>
 </html>

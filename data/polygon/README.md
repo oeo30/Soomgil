@@ -10,7 +10,7 @@ ddm-park-tree 데이터를 바탕으로 공원수목 나타내고, create_select
 select_map.html, park_map.html에서 export한 polygon들이 저장된 selected_area.geojson 파일을 수정한 뒤, polygon_data 폴더에 저장
 
 **공원 정보**
-어린이놀이터(분홍색)
+어린이놀이터(분홍색)<br>
 장안근린공원(파란색)
 마로니에어린이공원(연두색)
 마로니에어린이공원 왼쪽에 있는 아파트 단지의 공원(분홍색) (노드X)

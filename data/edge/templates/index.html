@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Edge 추가 지도</title>
+    <style>
+        [id^=map_] {
+            display: block;
+            margin: 20px auto;
+        }
+        #edgeForm {
+            text-align: center;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    {{ map_html|safe }}
+
+    <form id="edgeForm">
+        <button type="submit">엣지 저장</button>
+    </form>
+
+    <script>
+        let selectedNodes = [];
+        let pendingEdges = [];
+
+        // Leaflet popup 이벤트: marker 클릭 시 동작
+        map.on("popupopen", function (e) {
+            let osmid = e.popup.getContent();   // popup에 들어있는 osmid
+            let lat = e.popup._latlng.lat;
+            let lon = e.popup._latlng.lng;
+
+            selectedNodes.push({osmid: osmid, lat: lat, lon: lon});
+            console.log("노드 선택됨:", osmid);
+
+            if (selectedNodes.length === 2) {
+                let edge = {
+                    u: selectedNodes[0].osmid,
+                    v: selectedNodes[1].osmid,
+                    u_lat: selectedNodes[0].lat, u_lon: selectedNodes[0].lon,
+                    v_lat: selectedNodes[1].lat, v_lon: selectedNodes[1].lon
+                };
+                pendingEdges.push(edge);
+
+                // 지도에 선 그리기
+                L.polyline([
+                    [edge.u_lat, edge.u_lon],
+                    [edge.v_lat, edge.v_lon]
+                ], {color: "green", dashArray: "5,5"}).addTo(map);
+
+                alert(`엣지 추가됨: ${edge.u} → ${edge.v}`);
+                selectedNodes = []; // reset
+            }
+        });
+
+        document.getElementById("edgeForm").addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            if (pendingEdges.length === 0) {
+                alert("저장할 엣지가 없습니다!");
+                return;
+            }
+
+            fetch("/save_edges", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({edges: pendingEdges})
+            })
+            .then(res => res.json())
+            .then(data => {
+                console.log("저장 완료:", data);
+                pendingEdges = [];
+                location.reload();
+            });
+        });
+    </script>
+</body>
+</html>

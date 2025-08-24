@@ -23,11 +23,6 @@
         <button type="submit">저장</button>
     </form>
 
-    <!-- 지도 새로고침 버튼 -->
-    <form method="GET" action="/refresh">
-        <button type="submit">지도 새로고침</button>
-    </form>
-
     <script>
         let pendingNodes = [];  // 클릭한 좌표들을 임시 저장
 
@@ -49,7 +44,7 @@
                         let lon = parts[2];
                         pendingNodes.push({lat: lat, lon: lon});
                         console.log("좌표 추가됨:", lat, lon);
-                        console.log("현재 pendingNodes 배열:", pendingNodes);  // ✅ 누적된 좌표 배열 출력
+                        console.log("현재 pendingNodes 배열:", pendingNodes);  // 누적된 좌표 배열 출력
                     }
                 }
             });

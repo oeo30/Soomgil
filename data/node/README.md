@@ -1,9 +1,11 @@
-**add_nodes.py**:
+## **add_nodes.py**
 지도에서 노드를 찍고 실시간으로 지도에 표시 및 csv 파일로 저장할 수 있는 웹페이지를 flask로 구현
 
 osm으로 불러온 기존 노드를 파란색으로, 새로 추가한 노드를 빨간색으로 표시함
 
 (서로 다른 폴더에 독립적인 flask 코드를 구현해도 된다. 단, port 설정을 다르게 해야 한다. backend 구현할 때 주의해야 한다.)
 
-**merge_nodes.py**:
+<br>
+
+## **merge_nodes.py**
 nodes.csv, nodes_added.csv를 합쳐서 final_nodes.csv를 생성함.

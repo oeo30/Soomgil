@@ -9,33 +9,29 @@ app = Flask(__name__)
 NODE_PATH = "data/raw/nodes.csv"
 NODE_ADDED_PATH = "data/raw/nodes_added.csv"
 
-# 전역 데이터프레임
-df_nodes = None  # 기본 노드 + 추가된 노드 저장할 변수
+# 전역 변수
 df_base = pd.read_csv(NODE_PATH)
+df_nodes = df_base  # 기본 노드 + 추가된 노드 저장할 변수
+m = None
+
 
 def load_nodes(path=NODE_PATH):
     return pd.read_csv(path)
 
+
 def save_added_nodes(new_nodes):
-    """여러 노드를 nodes_added.csv에 append"""
+    # 여러 노드를 nodes_added.csv에 append
     if os.path.exists(NODE_ADDED_PATH):
         df_added = pd.read_csv(NODE_ADDED_PATH)
         df_added = pd.concat([df_added, pd.DataFrame(new_nodes)], ignore_index=True)
     else:
         df_added = pd.DataFrame(new_nodes)
+
     df_added.to_csv(NODE_ADDED_PATH, index=False)
 
 
 def make_map():
-    global df_base
-
-    """기본 노드 = 파란색, 추가 노드 = 빨간색"""
-
-    # 추가 노드 (없으면 빈 DF)
-    if os.path.exists(NODE_ADDED_PATH):
-        df_added = pd.read_csv(NODE_ADDED_PATH)
-    else:
-        df_added = pd.DataFrame(columns=["osmid", "lat", "lon"])
+    global m
 
     center = [df_base["lat"].mean(), df_base["lon"].mean()]
 
@@ -51,29 +47,44 @@ def make_map():
     ).add_to(m)
 
     # 기본 노드 (파란색)
-    for _, row in df_base.iterrows():
+    for row in df_base.itertuples():
         folium.CircleMarker(
-            location=[row["lat"], row["lon"]],
+            location=[row.lat, row.lon],
             radius=2,
             color="blue",
             fill=True,
             fill_opacity=0.7,
-            popup=f"osmid: {row['osmid']} (기본)",
+            popup=f"osmid: {row.osmid} (기본)",
         ).add_to(m)
 
+    # 클릭한 노드의 위도, 경도를 팝업으로 띄우기
+    m.add_child(folium.LatLngPopup())
+
+    return m._repr_html_()
+
+def reload_map():
+    global m
+
+    # 추가 노드 (없으면 빈 데이터프레임)
+    if os.path.exists(NODE_ADDED_PATH):
+        df_added = pd.read_csv(NODE_ADDED_PATH)
+    else:
+        df_added = pd.DataFrame(columns=["osmid", "lat", "lon"])
+    
     # 추가 노드 (빨간색)
-    for _, row in df_added.iterrows():
+    for row in df_added.itertuples():
         folium.CircleMarker(
-            location=[row["lat"], row["lon"]],
-            radius=4,
+            location=[row.lat, row.lon],
+            radius=2,
             color="red",
             fill=True,
-            fill_opacity=0.9,
-            popup=f"osmid: {row['osmid']} (추가)",
+            fill_opacity=0.7,
+            popup=f"osmid: {row.osmid} (추가)",
         ).add_to(m)
 
-    # 클릭 이벤트
+    # 클릭한 노드의 위도, 경도를 팝업으로 띄우기
     m.add_child(folium.LatLngPopup())
+
     return m._repr_html_()
 
 
@@ -81,9 +92,8 @@ def make_map():
 def index():
     global df_nodes
 
-    # 처음 접근 시 기본 노드만 로드
-    if df_nodes is None:
-        df_nodes = df_base
+    if m is None:
+        make_map()
 
     # POST 요청 (노드 추가)
     if request.method == "POST":
@@ -99,17 +109,16 @@ def index():
 
         new_node = {"osmid": new_osmid, "lat": lat, "lon": lon}
 
-        # 전역 데이터프레임에는 누적
+        # 전역 데이터프레임에 누적
         df_nodes = pd.concat([df_nodes, pd.DataFrame([new_node])], ignore_index=True)
 
         # 새 노드만 별도 저장
         save_added_nodes(new_node)
 
-        print("새로운 노드를 추가했습니다:", new_node)
         return redirect(url_for("index"))
 
     # 지도 생성 (기본 + 추가)
-    map_html = make_map()
+    map_html = reload_map()
     return render_template("index.html", map_html=map_html)
 
 @app.route("/save_nodes", methods=["POST"])
@@ -142,13 +151,6 @@ def save_nodes():
     save_added_nodes(processed)
 
     return jsonify({"status": "success", "saved": processed})
-
-
-@app.route("/refresh", methods=["GET"])
-def refresh():
-    # 새로고침 시에도 기본 + 추가 노드 같이 표시
-    map_html = make_map()
-    return render_template("index.html", map_html=map_html)
 
 
 if __name__ == "__main__":

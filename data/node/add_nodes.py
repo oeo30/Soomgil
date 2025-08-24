@@ -7,7 +7,7 @@ app = Flask(__name__)
 
 # CSV 경로
 NODE_PATH = "data/raw/nodes.csv"
-NODE_ADDED_PATH = "data/raw/nodes_added.csv"
+NODE_ADDED_PATH = "data/node/nodes_added.csv"
 
 # 전역 데이터프레임
 df_base = pd.read_csv(NODE_PATH)

@@ -1,22 +1,88 @@
 import { useNavigate } from "react-router-dom";
 import { useSelection } from "../context/SelectionContext.jsx";
 import { useEffect, useRef, useState } from "react";
+import { useAuth } from "../context/AuthContext.jsx";
 import * as L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
 export default function SetupPage() {
   const nav = useNavigate();
   const { startLocation, setStartLocation, duration, setDuration, canProceed } = useSelection();
+  const {isLoggedIn} = useAuth();
 
   // UI 상태
   const [showMap, setShowMap] = useState(false);
   const [showDurationInput, setShowDurationInput] = useState(false);
-  const [isLoggedIn] = useState(false); // 임시 로그인 상태
+  const [address, setAddress] = useState("");
+  const [inputAddr, setInputAddr] = useState("");
 
   // 지도 관리
   const mapRef = useRef(null);
   const markerRef = useRef(null);
   const mapDivRef = useRef(null);
+
+  // 좌표 → 주소 변환 (역지오코딩)
+  const fetchAddress = async (lat, lng) => {
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`
+      );
+      const data = await res.json();
+      
+      //동대문구 체크
+      if (data.address.city_district !== "동대문구"){
+        alert("동대문구 내에서만 선택 가능합니다.");
+        return;
+      }
+
+      // 기본 도로명 주소 (road + house_number)
+      let baseAddr = "";
+      if (data.address.road) {
+        baseAddr = `${data.address.road} ${data.address.house_number || ""}`.trim();
+      } else {
+        baseAddr = data.display_name;
+      }
+
+      // 건물 이름 (있으면 괄호 추가)
+      let building = "";
+      if (data.namedetails && data.namedetails.name) {
+        building = ` (${data.namedetails.name})`;
+      }
+
+      setAddress(baseAddr + building);
+    } catch (e) {
+      console.error("역지오코딩 실패:", e);
+    }
+  };
+
+    // 주소 → 좌표 변환 (지오코딩)
+  const searchAddress = async () => {
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
+          inputAddr
+        )}&format=json&limit=1`
+      );
+      const data = await res.json();
+      if (data.length > 0) {
+        const { lat, lon } = data[0];
+        const coords = [parseFloat(lat), parseFloat(lon)];
+
+        if (markerRef.current) {
+          markerRef.current.setLatLng(coords);
+        } else {
+          markerRef.current = L.marker(coords).addTo(mapRef.current);
+        }
+        mapRef.current.setView(coords, 15);
+        setStartLocation({ lat: coords[0], lng: coords[1] });
+        setAddress(data[0].display_name);
+      } else {
+        alert("주소를 찾을 수 없습니다.");
+      }
+    } catch (e) {
+      console.error("지오코딩 실패:", e);
+    }
+  };
 
   // 지도 초기화
   useEffect(() => {
@@ -40,6 +106,7 @@ export default function SetupPage() {
             markerRef.current = L.marker(e.latlng).addTo(mapRef.current);
           }
           setStartLocation({ lat, lng });
+          fetchAddress(lat, lng);
         });
       } else {
         // 이미 만들어진 지도를 다시 보이게 할 때 크기 재계산
@@ -62,7 +129,7 @@ export default function SetupPage() {
             </button>
           ) : (
             <button style={styles.headerBtn} onClick={() => nav("/login")}>
-              로그인/회원가입
+              Google 로그인
             </button>
           )}
         </div>
@@ -82,9 +149,9 @@ export default function SetupPage() {
             <div ref={mapDivRef} style={styles.map}></div>
           </div>
         )}
-        {startLocation && (
+        {address && (
           <p style={styles.text}>
-            선택된 좌표: {startLocation.lat.toFixed(5)}, {startLocation.lng.toFixed(5)}
+            선택된 주소: {address}
           </p>
         )}
 

@@ -1,3 +1,38 @@
+# Edges폴더
+## **add_edges.py**
+지도에서 서로 다른 두 노드를 클릭하면 두 노드를 잇는 엣지를 만들어서 저장함.
+
+flask로 구현함.
+
+<br>
+
+## **filter_edges_data.py**
+edges.geojson 파일에서 필요한 정보만 뽑아내는 코드.
+
+<br>
+
+## **add_tag_to_edge.ipynb**
+어떤 엣지의 시작 노드와 끝 노드 중 하나라도 특정 polygon 영역에 포함되면 그 엣지가 해당 polygon에 속한다고 간주하고, tag를 부여함.
+
+<br>
+
+## **merge_edges.py**
+edges.geojson, edges_added.geojson을 합쳐서 final_edges.geojson을 생성함.
+
+
+## **add_nodes.py**
+지도에서 노드를 찍고 실시간으로 지도에 표시 및 csv 파일로 저장할 수 있는 웹페이지를 flask로 구현
+
+osm으로 불러온 기존 노드를 파란색으로, 새로 추가한 노드를 빨간색으로 표시함
+
+(서로 다른 폴더에 독립적인 flask 코드를 구현해도 된다. 단, port 설정을 다르게 해야 한다. backend 구현할 때 주의해야 한다.)
+
+<br>
+
+## **merge_nodes.py**
+nodes.csv, nodes_added.csv를 합쳐서 final_nodes.csv를 생성함.
+
+ # polygon
 
 
 # data 폴더 구조 및 설명

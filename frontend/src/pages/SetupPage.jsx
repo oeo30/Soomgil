@@ -8,62 +8,71 @@ import "leaflet/dist/leaflet.css";
 export default function SetupPage() {
   const nav = useNavigate();
   const { startLocation, setStartLocation, duration, setDuration, canProceed } = useSelection();
-  const {isLoggedIn} = useAuth();
+  const { isLoggedIn } = useAuth();
 
-  // UI 상태
   const [showMap, setShowMap] = useState(false);
   const [showDurationInput, setShowDurationInput] = useState(false);
   const [address, setAddress] = useState("");
-  const [inputAddr, setInputAddr] = useState("");
 
-  // 지도 관리
   const mapRef = useRef(null);
   const markerRef = useRef(null);
   const mapDivRef = useRef(null);
+  const boundaryLayerRef = useRef(null); // 동대문구 경계 레이어 저장
 
-  // 좌표 → 주소 변환 (역지오코딩)
+  // 주소 포맷 함수
+  const formatAddress = (addr, namedetails) => {
+    const city = addr.city || addr.state || "";
+    const district =
+      addr.city_district || addr.borough || addr.county || addr.state_district || "";
+    const road = addr.road || "";
+    const houseNo = addr.house_number || "";
+
+    let baseAddr = `${city} ${district} ${road} ${houseNo}`.trim();
+
+    let building = "";
+    if (namedetails && namedetails.name) {
+      building = ` (${namedetails.name})`;
+    }
+    return baseAddr + building;
+  };
+
+  // 좌표 → 주소 변환
   const fetchAddress = async (lat, lng) => {
     try {
       const res = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`
+        `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1&namedetails=1`
       );
       const data = await res.json();
-      
-      //동대문구 체크
-      if (data.address.city_district !== "동대문구"){
+
+      if (!data.display_name.includes("동대문구")) {
         alert("동대문구 내에서만 선택 가능합니다.");
+        setAddress("");
+        if (markerRef.current) {
+          mapRef.current.removeLayer(markerRef.current);
+          markerRef.current = null;
+        }
         return;
       }
 
-      // 기본 도로명 주소 (road + house_number)
-      let baseAddr = "";
-      if (data.address.road) {
-        baseAddr = `${data.address.road} ${data.address.house_number || ""}`.trim();
-      } else {
-        baseAddr = data.display_name;
-      }
-
-      // 건물 이름 (있으면 괄호 추가)
-      let building = "";
-      if (data.namedetails && data.namedetails.name) {
-        building = ` (${data.namedetails.name})`;
-      }
-
-      setAddress(baseAddr + building);
+      setAddress(formatAddress(data.address, data.namedetails));
     } catch (e) {
       console.error("역지오코딩 실패:", e);
     }
   };
 
-    // 주소 → 좌표 변환 (지오코딩)
+  // 주소 → 좌표 변환
   const searchAddress = async () => {
     try {
+      let query = address.replace(/\s+/g, "");
+      query = query.replace(/(로|길)(\d+)/g, "$1 $2");
+
       const res = await fetch(
         `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
-          inputAddr
-        )}&format=json&limit=1`
+          query
+        )}&format=json&limit=1&addressdetails=1&namedetails=1`
       );
       const data = await res.json();
+
       if (data.length > 0) {
         const { lat, lon } = data[0];
         const coords = [parseFloat(lat), parseFloat(lon)];
@@ -73,11 +82,16 @@ export default function SetupPage() {
         } else {
           markerRef.current = L.marker(coords).addTo(mapRef.current);
         }
-        mapRef.current.setView(coords, 15);
+
+        if (mapRef.current) {
+          mapRef.current.setView(coords, 15);
+        }
+
         setStartLocation({ lat: coords[0], lng: coords[1] });
-        setAddress(data[0].display_name);
+        await fetchAddress(coords[0], coords[1]);
       } else {
         alert("주소를 찾을 수 없습니다.");
+        setAddress("");
       }
     } catch (e) {
       console.error("지오코딩 실패:", e);
@@ -88,28 +102,51 @@ export default function SetupPage() {
   useEffect(() => {
     if (showMap && mapDivRef.current) {
       if (!mapRef.current) {
-        // 최초 생성
-        mapRef.current = L.map(mapDivRef.current, {
-          center: [37.5665, 126.9780],
+        const mapInstance = L.map(mapDivRef.current, {
+          center: [37.5839, 127.0559], // 동대문구 중심 근처
           zoom: 13,
         });
 
         L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
           attribution: "&copy; OpenStreetMap contributors",
-        }).addTo(mapRef.current);
+        }).addTo(mapInstance);
 
-        mapRef.current.on("click", (e) => {
+        mapRef.current = mapInstance;
+
+        // ✅ 지도 클릭 시 → 마커 + 주소 표시
+        mapInstance.on("click", async (e) => {
           const { lat, lng } = e.latlng;
           if (markerRef.current) {
             markerRef.current.setLatLng(e.latlng);
           } else {
-            markerRef.current = L.marker(e.latlng).addTo(mapRef.current);
+            markerRef.current = L.marker(e.latlng).addTo(mapInstance);
           }
           setStartLocation({ lat, lng });
-          fetchAddress(lat, lng);
+          await fetchAddress(lat, lng);
         });
+
+        // ✅ 동대문구 경계 표시 (GeoJSON)
+        fetch(
+          "https://nominatim.openstreetmap.org/search.php?q=동대문구&polygon_geojson=1&format=json"
+        )
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.length > 0 && data[0].geojson) {
+              if (boundaryLayerRef.current) {
+                mapInstance.removeLayer(boundaryLayerRef.current);
+              }
+              boundaryLayerRef.current = L.geoJSON(data[0].geojson, {
+                style: {
+                  color: "red",
+                  weight: 2,
+                  fill: false,
+                },
+              }).addTo(mapInstance);
+
+              mapInstance.fitBounds(boundaryLayerRef.current.getBounds());
+            }
+          });
       } else {
-        // 이미 만들어진 지도를 다시 보이게 할 때 크기 재계산
         setTimeout(() => {
           mapRef.current.invalidateSize();
         }, 100);
@@ -135,25 +172,48 @@ export default function SetupPage() {
         </div>
       </div>
 
-      {/* 타이틀 */}
       <h1 style={styles.title}>숨길</h1>
       <h2 style={styles.subtitle}>자연을 걷는 도시, 동대문</h2>
 
-      {/* 버튼들 */}
       <div style={styles.buttons}>
         <button style={styles.btn} onClick={() => setShowMap((prev) => !prev)}>
           시작 위치 선택
         </button>
+
         {showMap && (
-          <div style={{ width: "100%", display: "flex", justifyContent: "center" }}>
+          <div
+            style={{
+              width: "100%",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+            }}
+          >
+            {/* 주소 입력칸 */}
+            <div style={styles.addressBox}>
+              <input
+                type="text"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                placeholder="도로명 주소 입력하기"
+                style={styles.addressInput}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    searchAddress();
+                  }
+                }}
+              />
+              <button onClick={searchAddress} style={styles.searchBtn}>
+                확인
+              </button>
+            </div>
+
+            {/* 지도 */}
             <div ref={mapDivRef} style={styles.map}></div>
           </div>
         )}
-        {address && (
-          <p style={styles.text}>
-            선택된 주소: {address}
-          </p>
-        )}
+
+        {address && <p style={styles.text}>선택된 위치: {address}</p>}
 
         <button style={styles.btn} onClick={() => setShowDurationInput((prev) => !prev)}>
           소요 시간 선택
@@ -226,6 +286,30 @@ const styles = {
     textAlign: "center",
   },
   text: { fontSize: 14, marginTop: 6, color: "#333" },
+  addressBox: {
+    marginTop: 12,
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+  },
+  addressInput: {
+    flex: 1,
+    padding: "10px 14px",
+    borderRadius: 12,
+    border: "1px solid #ccc",
+    fontSize: 14,
+    minWidth: "280px",
+  },
+  searchBtn: {
+    padding: "10px 16px",
+    borderRadius: 12,
+    border: "none",
+    background: "#4f46e5",
+    color: "#fff",
+    cursor: "pointer",
+  },
 };
+
+
 
 

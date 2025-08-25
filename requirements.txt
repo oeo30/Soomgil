@@ -8,7 +8,7 @@ Jinja2==3.1.6
 MarkupSafe==3.0.2
 numpy==2.3.2
 packaging==25.0
-pandas==2.3.1
+pandas
 appnope==0.1.4
 asttokens==3.0.0
 branca==0.8.1
@@ -44,7 +44,6 @@ psutil==7.0.0
 ptyprocess==0.7.0
 pure_eval==0.2.3
 Pygments==2.19.2
->>>>>>> f001aa5 ([chore] add requests to requirements)
 pyogrio==0.11.1
 pyproj==3.7.2
 python-dateutil==2.9.0.post0

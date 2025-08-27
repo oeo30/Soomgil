@@ -4,7 +4,8 @@
     {
       "type": "Feature",
       "properties": {
-        "type": "park"
+        "type": "park",
+        "name": "어린이 놀이터"
       },
       "geometry": {
         "type": "Polygon",
@@ -45,7 +46,8 @@
     {
       "type": "Feature",
       "properties": {
-        "type": "park"
+        "type": "park",
+        "name": "장안 근린 공원"
       },
       "geometry": {
         "type": "Polygon",
@@ -86,7 +88,8 @@
     {
       "type": "Feature",
       "properties": {
-        "type": "park"
+        "type": "park",
+        "name": "마로니에 어린이 공원"
       },
       "geometry": {
         "type": "Polygon",
@@ -119,7 +122,8 @@
     {
       "type": "Feature",
       "properties": {
-        "type": "park"
+        "type": "park",
+        "name": "공원"
       },
       "geometry": {
         "type": "Polygon",
@@ -156,7 +160,8 @@
     {
       "type": "Feature",
       "properties": {
-        "type": "park"
+        "type": "park",
+        "name": "늘봄 어린이 공원"
       },
       "geometry": {
         "type": "Polygon",
@@ -189,7 +194,8 @@
     {
       "type": "Feature",
       "properties": {
-        "type": "park"
+        "type": "park",
+        "name": "장미 공원"
       },
       "geometry": {
         "type": "Polygon",
@@ -222,7 +228,8 @@
     {
       "type": "Feature",
       "properties": {
-        "type": "park"
+        "type": "park",
+        "name": "공원"
       },
       "geometry": {
         "type": "Polygon",
@@ -259,7 +266,8 @@
     {
       "type": "Feature",
       "properties": {
-        "type": "park"
+        "type": "park",
+        "name": "샛별 어린이 공원"
       },
       "geometry": {
         "type": "Polygon",
@@ -296,7 +304,8 @@
     {
       "type": "Feature",
       "properties": {
-        "type": "park"
+        "type": "park",
+        "name": "한내 어린이 공원"
       },
       "geometry": {
         "type": "Polygon",
@@ -333,7 +342,8 @@
     {
       "type": "Feature",
       "properties": {
-        "type": "park"
+        "type": "park",
+        "name": "장평 근린 공원"
       },
       "geometry": {
         "type": "Polygon",
@@ -374,7 +384,8 @@
     {
       "type": "Feature",
       "properties": {
-        "type": "park"
+        "type": "park",
+        "name": "공원"
       },
       "geometry": {
         "type": "Polygon",
@@ -407,7 +418,8 @@
     {
       "type": "Feature",
       "properties": {
-        "type": "park"
+        "type": "park",
+        "name": "공원"
       },
       "geometry": {
         "type": "Polygon",
@@ -440,7 +452,8 @@
     {
       "type": "Feature",
       "properties": {
-        "type": "park"
+        "type": "park",
+        "name": "공원"
       },
       "geometry": {
         "type": "Polygon",
@@ -477,7 +490,8 @@
     {
       "type": "Feature",
       "properties": {
-        "type": "park"
+        "type": "park",
+        "name": "공원"
       },
       "geometry": {
         "type": "Polygon",
@@ -530,7 +544,8 @@
     {
       "type": "Feature",
       "properties": {
-        "type": "park"
+        "type": "park",
+        "name": "아름드리 어린이 공원"
       },
       "geometry": {
         "type": "Polygon",
@@ -563,7 +578,8 @@
     {
       "type": "Feature",
       "properties": {
-        "type": "park"
+        "type": "park",
+        "name": "초화원"
       },
       "geometry": {
         "type": "Polygon",
@@ -624,7 +640,8 @@
     {
       "type": "Feature",
       "properties": {
-        "type": "park"
+        "type": "park",
+        "name": "활터 어린이 공원"
       },
       "geometry": {
         "type": "Polygon",
@@ -657,7 +674,8 @@
     {
       "type": "Feature",
       "properties": {
-        "type": "park"
+        "type": "park",
+        "name": "공원"
       },
       "geometry": {
         "type": "Polygon",
@@ -698,7 +716,8 @@
     {
       "type": "Feature",
       "properties": {
-        "type": "park"
+        "type": "park",
+        "name": "간데메 공원"
       },
       "geometry": {
         "type": "Polygon",
@@ -731,7 +750,8 @@
     {
       "type": "Feature",
       "properties": {
-        "type": "park"
+        "type": "park",
+        "name": "용두 공원"
       },
       "geometry": {
         "type": "Polygon",
@@ -776,7 +796,8 @@
     {
       "type": "Feature",
       "properties": {
-        "type": "park"
+        "type": "park",
+        "name": "우산각 어린이 공원"
       },
       "geometry": {
         "type": "Polygon",
@@ -813,7 +834,8 @@
     {
       "type": "Feature",
       "properties": {
-        "type": "park"
+        "type": "park",
+        "name": "방아다리 어린이 공원"
       },
       "geometry": {
         "type": "Polygon",

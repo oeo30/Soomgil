@@ -3,8 +3,5 @@ venv/
 .ipynb_checkpoints/
 .env
 __pycache__/
-<<<<<<< HEAD
 *.pyc
-=======
-*.pyc
->>>>>>> develop
+

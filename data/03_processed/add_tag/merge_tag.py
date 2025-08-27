@@ -1,8 +1,8 @@
 import json
 
 # 파일 경로
-polygon_path = "data/03_processed/add_tag/edges_with_polygon.geojson"
-tree_path = "data/03_processed/add_tag/edges_with_tree.geojson"
+polygon_path = "data/03_processed/add_tag/polygon/edges_with_polygon.geojson"
+tree_path = "data/03_processed/add_tag/tree/edges_with_tree.geojson"
 output_path = "data/03_processed/add_tag/final_edges_with_tag.geojson"
 
 # 파일 로드

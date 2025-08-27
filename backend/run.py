@@ -45,8 +45,19 @@ def get_description():
     else:
         return jsonify({"error": "설명 파일 없음"}), 404
     
-
-
+@app.route("/api/generate-music", methods=["POST"])
+def generate_music():
+    data = request.get_json()
+    mood = data.get("mood", "mysterious and cinematic")
+    # music.py를 mood 파라미터로 실행 (예: subprocess)
+    result = subprocess.run([
+        "python", "backend/app/services/musicgen/music.py", mood
+    ])
+    music_path = "backend/app/services/musicgen/generated_music.wav"
+    if os.path.exists(music_path):
+        return send_file(music_path, mimetype="audio/wav")
+    else:
+        return jsonify({"error": "음악 생성 실패"}), 500
 
 if __name__ == "__main__":
     app.run(debug=True)

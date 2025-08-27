@@ -44,6 +44,8 @@ def get_description():
         return jsonify(data)
     else:
         return jsonify({"error": "설명 파일 없음"}), 404
+    
+
 
 
 if __name__ == "__main__":

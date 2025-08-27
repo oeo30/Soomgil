@@ -9,12 +9,11 @@ import { FaChevronRight, FaChevronDown } from "react-icons/fa";
 
 export default function SetupPage() {
   const nav = useNavigate();
-  const { startLocation, setStartLocation, duration, setDuration, canProceed } = useSelection();
+  const { setStartLocation, duration, setDuration, canProceed, setAddress, address } = useSelection();
   const { isLoggedIn } = useAuth();
 
   const [showMap, setShowMap] = useState(false);
   const [showDurationInput, setShowDurationInput] = useState(false);
-  const [address, setAddress] = useState("");
   const [showMoodInput, setShowMoodInput] = useState(false);
   const [mood, setMood] = useState("");
 
@@ -66,19 +65,21 @@ export default function SetupPage() {
   // 주소 → 좌표 변환
   const searchAddress = async () => {
     try {
-      let query = address.replace(/\s+/g, "");
-      query = query.replace(/(로|대로)(\d+)(길)/g, "$1 $2$3");
-      query = query.replace(/(길)(\d+)/g, "$1 $2");
-      query = query.replace(/(로|길)(\d+)([가-하]?)/g, "$1 $2$3");
+      let query = address.trim();
+      let fullQuery = `서울특별시 동대문구 ${query}`;
 
-      query = `서울특별시 동대문구 ${query}`;
+      let res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(fullQuery)}&format=json&limit=1&addressdetails=1&namedetails=1`);
+      let data = await res.json();
 
-      const res = await fetch(
-        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
-          query
-        )}&format=json&limit=1&addressdetails=1&namedetails=1`
-      );
-      const data = await res.json();
+      if (data.length === 0) {
+        // 실패하면 띄어쓰기 버전도 시도
+        let fallback = query.replace(/로(\d+)길/g, "로 $1길").replace(/길(\d+)/g, "길 $1");
+        fullQuery = `서울특별시 동대문구 ${fallback}`;
+
+        res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(fullQuery)}&format=json&limit=1&addressdetails=1&namedetails=1`);
+        data = await res.json();
+      }
+
 
       if (data.length > 0) {
         const { lat, lon } = data[0];
@@ -170,7 +171,7 @@ fetch("https://nominatim.openstreetmap.org/search.php?q=동대문구&polygon_geo
         <div>
           {isLoggedIn ? (
             <button style={styles.headerBtn} onClick={() => nav("/mypage")}>
-              My Page
+              내 정보
             </button>
           ) : (
             <button style={styles.headerBtn} onClick={() => nav("/login")}>
@@ -242,11 +243,12 @@ fetch("https://nominatim.openstreetmap.org/search.php?q=동대문구&polygon_geo
                 style={styles.addressInput}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
+                    searchAddress();
                     // 검색 함수 호출
                   }
                 }}
               />
-              <button style={styles.searchBtn}>확인</button>
+              <button style={styles.searchBtn} onClick={searchAddress}>확인</button>
             </div>
             <div ref={mapDivRef} style={styles.map}></div>
           </div>
@@ -287,7 +289,7 @@ fetch("https://nominatim.openstreetmap.org/search.php?q=동대문구&polygon_geo
         <button
           style={{
             ...styles.btn,
-            background: canProceed ? "#4f46e5" : "#aaa",
+            background: canProceed ? "#e2a06eff" : "#aaa",
             marginTop: 20,
             borderRadius: "999px",
             padding: "12px 24px",

@@ -7,6 +7,9 @@ export function SelectionProvider({ children }) {
   // 시작 위치 좌표 {lat, lng}
   const [startLocation, setStartLocation] = useState(null);
 
+  // 시작 위치 주소 문자열
+  const [address, setAddress] = useState("");
+
   // 소요 시간 (분) → 최소 5 이상
   const [duration, setDuration] = useState(null);
 
@@ -19,6 +22,7 @@ export function SelectionProvider({ children }) {
         if (saved && typeof saved === "object") {
           setStartLocation(saved.startLocation ?? null);
           setDuration(saved.duration ?? null);
+          setAddress(saved.address ?? "");   // ✅ 주소 복구 추가
         }
       }
     } catch (e) {
@@ -29,12 +33,12 @@ export function SelectionProvider({ children }) {
   // 값이 바뀔 때마다 로컬스토리지 저장
   useEffect(() => {
     try {
-      const data = { startLocation, duration };
+      const data = { startLocation, duration, address }; // ✅ 주소 저장 추가
       localStorage.setItem(KEY, JSON.stringify(data));
     } catch (e) {
       console.warn("[SelectionContext] persist failed:", e);
     }
-  }, [startLocation, duration]);
+  }, [startLocation, duration, address]);
 
   // 버튼 활성화 조건 → 시작위치 있고, duration ≥ 5
   const canProceed = Boolean(startLocation && duration >= 5);
@@ -43,10 +47,11 @@ export function SelectionProvider({ children }) {
   const value = useMemo(
     () => ({
       startLocation, setStartLocation,
+      address, setAddress,   // ✅ 주소 공유
       duration, setDuration,
       canProceed,
     }),
-    [startLocation, duration, canProceed]
+    [startLocation, address, duration, canProceed]
   );
 
   return <SelectionContext.Provider value={value}>{children}</SelectionContext.Provider>;

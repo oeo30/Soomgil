@@ -67,5 +67,5 @@ button:focus-visible {
 
 @font-face {
   font-family: "MyCustomFont";
-  src: url("/public/fonts/나눔손글씨 무궁화.ttf") format("truetype");
+  src: url("/fonts/Mugunghwa.ttf") format("truetype");
 }

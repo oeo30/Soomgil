@@ -1,7 +1,6 @@
 asttokens==3.0.0
 branca==0.8.1
-certifi==2025.7.9
-charset-normalizer==3.4.2
+charset-normalizer
 comm==0.2.2
 contourpy==1.3.2
 cycler==0.12.1
@@ -29,7 +28,7 @@ matplotlib-inline==0.1.7
 nest-asyncio==1.6.0
 networkx==3.4.2
 nominatim==0.1
-numpy==2.2.6
+numpy==1.26.4
 openpyxl==3.1.5
 osmnx==2.0.5
 packaging==25.0
@@ -49,7 +48,6 @@ pyproj==3.7.1
 python-dateutil==2.9.0.post0
 pytz==2025.2
 pyzmq==27.0.0
-requests==2.32.4
 shapely==2.1.1
 six==1.17.0
 stack-data==0.6.3
@@ -57,9 +55,8 @@ tornado==6.5.1
 traitlets==5.14.3
 typing_extensions==4.14.1
 urllib3==2.5.0
-certifi==2025.8.3
+certifi
 cffi==1.17.1
-charset-normalizer==3.4.3
 filelock==3.19.1
 fsspec==2025.7.0
 hf-xet==1.1.8

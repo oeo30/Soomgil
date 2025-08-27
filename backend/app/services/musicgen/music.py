@@ -51,10 +51,17 @@ musicgen_model.to("cuda" if torch.cuda.is_available() else "cpu")
 # 산책 시간 기반 안전 토큰 계산
 walk_minutes = 10  # 원하는 산책 시간
 tokens_per_sec = 16
+<<<<<<< HEAD
 MAX_TOKENS_MODEL = 2048  # small 모델 안전 최대 토큰
 
 tokens_per_generate = min(walk_minutes * 60 * tokens_per_sec, MAX_TOKENS_MODEL)
 print(f"✅ 생성 토큰: {tokens_per_generate} tokens (모델 안전 범위 내)")
+=======
+MAX_TOKENS_MODEL = 1024  # small 모델 안전 최대 토큰 2048
+
+tokens_per_generate = min(walk_minutes * 60 * tokens_per_sec, MAX_TOKENS_MODEL)
+print(f"✅ 생성 토큰: {tokens_per_generate} tokens")
+>>>>>>> develop
 
 # 오디오 생성
 inputs = processor(text=[prompt], return_tensors="pt").to(musicgen_model.device)

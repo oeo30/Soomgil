@@ -1,12 +1,7 @@
 import requests
 from datetime import datetime
 
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
-
-API_KEY = os.environ.get("OPENWEATHER_API_KEY")
+API_KEY = "여기에 키값"
 BASE_URL = "http://api.openweathermap.org/data/2.5/weather"
 
 def get_weather(city="Seoul", country="KR"):
@@ -25,7 +20,7 @@ def get_weather(city="Seoul", country="KR"):
         raise Exception(f"Weather API error: {data}")
 
 def get_season():
-    month = datetime.now().month
+    month = datetime.now().monthㅎ
     if month in [12, 1, 2]:
         return "winter"
     elif month in [3, 4, 5]:

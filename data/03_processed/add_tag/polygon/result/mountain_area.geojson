@@ -4,7 +4,8 @@
     {
       "type": "Feature",
       "properties": {
-        "type": "mountain"
+        "type": "mountain",
+        "name": "천장산"
       },
       "geometry": {
         "type": "Polygon",
@@ -116,12 +117,14 @@
             ]
           ]
         ]
-      }
+      },
+      "name": "천장산"
     },
     {
       "type": "Feature",
       "properties": {
-        "type": "mountain"
+        "type": "mountain",
+        "name": "배봉산"
       },
       "geometry": {
         "type": "Polygon",
@@ -209,12 +212,14 @@
             ]
           ]
         ]
-      }
+      },
+      "name": "배봉산"
     },
     {
       "type": "Feature",
       "properties": {
-        "type": "mountain"
+        "type": "mountain",
+        "name": "배봉산"
       },
       "geometry": {
         "type": "Polygon",
@@ -266,7 +271,8 @@
             ]
           ]
         ]
-      }
+      },
+      "name": "배봉산"
     }
   ]
 }

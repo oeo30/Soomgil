@@ -1,8 +1,7 @@
 import requests
 from datetime import datetime
 
-# 직접 API 키 삽입 (다른 사람도 바로 실행 가능)
-API_KEY = "a487bb124540355529986f5500bada08"
+API_KEY = "여기에 키값"
 BASE_URL = "http://api.openweathermap.org/data/2.5/weather"
 
 def get_weather(city="Seoul", country="KR"):

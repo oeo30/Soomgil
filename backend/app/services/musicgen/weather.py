@@ -20,7 +20,7 @@ def get_weather(city="Seoul", country="KR"):
         raise Exception(f"Weather API error: {data}")
 
 def get_season():
-    month = datetime.now().month
+    month = datetime.now().monthㅎ
     if month in [12, 1, 2]:
         return "winter"
     elif month in [3, 4, 5]:

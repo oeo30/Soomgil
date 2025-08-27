@@ -67,7 +67,6 @@ MarkupSafe==3.0.2
 mpmath==1.3.0
 networkx==3.4.2
 ninja==1.13.0
-numpy==2.2.6
 packaging==25.0
 pillow==11.3.0
 pycparser==2.22

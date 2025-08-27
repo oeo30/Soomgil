@@ -1,5 +1,6 @@
 import os
 import time
+import sys
 from weather import get_weather
 from transformers import AutoProcessor, MusicgenForConditionalGeneration
 import torch
@@ -24,12 +25,13 @@ weather_map = {
 
 weather_en = weather_map.get(weather_info["description"], "clear")
 
-# user_input 설정
+# mood를 커맨드라인 인자로 받음 (확인필요)
+mood = sys.argv[1] if len(sys.argv) > 1 else "mysterious and cinematic"
 user_input = {
     "weather": weather_en,
     "season": weather_info["season"],
     "activity": "walking",
-    "mood": "mysterious and cinematic"
+    "mood": mood
 }
 
 # 프롬프트 생성
@@ -68,9 +70,8 @@ normalized = audio_array / np.max(np.abs(audio_array))
 int16_audio = (normalized * 32767).astype(np.int16)
 
 # 출력 폴더 및 WAV 저장
-output_dir = "musicgen_output"
-os.makedirs(output_dir, exist_ok=True)
-output_path = os.path.join(output_dir, "generated_music.wav")
+output_path = "backend/app/services/musicgen/generated_music.wav"
+os.makedirs(os.path.dirname(output_path), exist_ok=True)
 scipy.io.wavfile.write(output_path, rate=32000, data=int16_audio)
 print(f"✅ 음악 생성 완료! 저장됨 → {output_path}")
 

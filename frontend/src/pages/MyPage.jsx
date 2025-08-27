@@ -161,7 +161,8 @@ const styles = {
   },
   nickname: {
     margin: "10px 0 0 0",
-    fontSize: 26,
+    fontSize: 50,
+    fontFamily: "MyCustomFont",textShadow: "0.5px 0 black, -0.5px 0 black, 0 0.5px black, 0 -0.5px black",
   },
   badge: {
     background: "#FFD700",
@@ -175,7 +176,8 @@ const styles = {
   },
   totalTime: {
     marginTop: 4,
-    fontSize: 14,
+    fontSize: 20,
+    fontFamily: "MyCustomFont",textShadow: "0.3px 0 black, -0.3px 0 black, 0 0.3px black, 0 -0.3px black",
   },
 
   stampBoard: {
@@ -206,8 +208,9 @@ const styles = {
     border: "2px solid #ccc",
     background: "#fff",
   },
-  subtitle: { fontSize: 26, marginBottom: 16 },
+  subtitle: { fontSize: 50, marginBottom: 16, fontFamily: "MyCustomFont",textShadow: "0.5px 0 black, -0.5px 0 black, 0 0.5px black, 0 -0.5px black", },
   recordHeader: {
+    fontSize: 30,
     display: "grid",
     gridTemplateColumns: "1fr 2fr 1fr 3fr",
     fontWeight: "bold",
@@ -215,8 +218,9 @@ const styles = {
     borderBottom: "2px solid #ccc",
     marginBottom: 8,
     textAlign: "center",
+    fontFamily: "MyCustomFont",textShadow: "0.5px 0 black, -0.5px 0 black, 0 0.5px black, 0 -0.5px black",
   },
-  recordList: { display: "flex", flexDirection: "column", gap: 8 },
+  recordList: { fontSize: 20, display: "flex", flexDirection: "column", gap: 8, fontFamily: "MyCustomFont",textShadow: "0.3px 0 black, -0.3px 0 black, 0 0.3px black, 0 -0.3px black", },
   recordCard: {
     display: "grid",
     gridTemplateColumns: "1fr 2fr 1fr 3fr",

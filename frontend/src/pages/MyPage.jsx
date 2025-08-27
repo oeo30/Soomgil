@@ -4,7 +4,7 @@ export default function MyPage() {
   const badge = "🥇 초보 산책러";
   const totalWalkTime = 380; // 분 단위
 
-    // 분 → "시간 분" 변환
+  // 분 → "시간 분" 변환
   const formatTime = (minutes) => {
     const h = Math.floor(minutes / 60);
     const m = minutes % 60;
@@ -64,7 +64,7 @@ export default function MyPage() {
   ];
 
   // 총 50칸 (5x10)
-  const totalSlots = 50;
+  const totalSlots = 25;
   const stampArray = Array.from({ length: totalSlots }).map((_, i) => {
     if (i < stamps) {
       const randIdx = Math.floor(Math.random() * stampImgs.length);
@@ -76,18 +76,19 @@ export default function MyPage() {
 
   return (
     <div style={styles.page}>
-      {/* 상단 프로필 + 닉네임/뱃지 + 스탬프판 */}
+      {/* 상단 프로필 + 스탬프판 */}
       <div style={styles.header}>
-          <div style={styles.profileSection}>
-            <img src={profileImg} alt="프로필" style={styles.profileImg} />
+        {/* 프로필 섹션 */}
+        <div style={styles.profileSection}>
+          <img src={profileImg} alt="프로필" style={styles.profileImg} />
+          <h2 style={styles.nickname}>{nickname}</h2>
+          <span style={styles.badge}>{badge}</span>
+          <span style={styles.totalTime}>
+            총 산책 시간: {formatTime(totalWalkTime)}
+          </span>
+        </div>
 
-            <div style={styles.userInfo}>
-              <h2 style={styles.nickname}>{nickname}</h2>
-              <span style={styles.badge}>{badge}</span>
-              <span style={styles.totalTime}>총 산책 시간: {formatTime(totalWalkTime)}</span>
-            </div>
-         </div>
-
+        {/* 스탬프판 */}
         <div style={styles.stampBoard}>
           {stampArray.map((item, idx) => (
             <div key={idx} style={styles.stampCell}>
@@ -101,9 +102,9 @@ export default function MyPage() {
         </div>
       </div>
 
-        {/* 산책 기록 */}
-        <div style={{ marginTop: 40 }}>
-          <h3 style={styles.subtitle}>🌳 나의 산책 기록</h3>
+      {/* 산책 기록 */}
+      <div style={{ marginTop: 40 }}>
+        <h3 style={styles.subtitle}>🌳 나의 산책 기록</h3>
 
         {/* 제목 줄 */}
         <div style={styles.recordHeader}>
@@ -115,14 +116,22 @@ export default function MyPage() {
 
         {/* 실제 기록 */}
         <div style={styles.recordList}>
-          {routes.map((r, idx) => (
-            <div key={idx} style={styles.recordCard}>
-              <span>{r.date}</span>
-              <span>{r.startLocation}</span>
-              <span>{formatTime(r.duration)}</span>
-              <span>{r.description}</span>
-            </div>
-          ))}
+          {routes.map((r, idx) => {
+    // "서울 동대문구 " 기준으로 분리
+    const [prefix, rest] = r.startLocation.split("동대문구 ");
+    return (
+      <div key={idx} style={styles.recordCard}>
+        <span>{r.date}</span>
+        <span>
+          {prefix}동대문구
+          <br />
+          {rest}
+        </span>
+        <span>{formatTime(r.duration)}</span>
+        <span>{r.description}</span>
+      </div>
+    );
+  })}
         </div>
       </div>
     </div>
@@ -133,30 +142,26 @@ const styles = {
   page: { maxWidth: 1000, margin: "20px auto", padding: 20 },
   header: {
     display: "flex",
-    alignItems: "center",
+    alignItems: "flex-start",
     justifyContent: "space-between",
     gap: 20,
   },
   profileSection: {
     display: "flex",
+    flexDirection: "column", // 세로 정렬
     alignItems: "center",
-    gap: 16,
-  },
-  profileImg: { 
-    width: 150, 
-    height: 150, 
-    borderRadius: "50%", 
-    objectFit: "cover"
-  },
-  userInfo: { 
-    display: "flex", 
-    flexDirection: "column", 
     gap: 8,
-    marginLeft:20, 
+    width: 200,
   },
-  nickname: { 
-    margin: 0, 
-    fontSize: 30 
+  profileImg: {
+    width: 150,
+    height: 150,
+    borderRadius: "50%",
+    objectFit: "cover",
+  },
+  nickname: {
+    margin: "10px 0 0 0",
+    fontSize: 26,
   },
   badge: {
     background: "#FFD700",
@@ -168,23 +173,23 @@ const styles = {
     display: "inline-block",
     width: "fit-content",
   },
-  totalTime: { 
-    marginTop: 4, 
-    marginLeft: 10,
-    fontSize: 14, 
+  totalTime: {
+    marginTop: 4,
+    fontSize: 14,
   },
 
   stampBoard: {
     display: "grid",
-    gridTemplateColumns: "repeat(10, 28px)", // 10열
-    gridTemplateRows: "repeat(5, 28px)",    // 5행
+    gridTemplateColumns: "repeat(5, 28px)", // 10열
+    gridTemplateRows: "repeat(5, 28px)", // 5행
     gap: 4,
     background: "#f9f9f9",
     padding: 8,
     borderRadius: 12,
     border: "1px solid #ddd",
     transform: "scale(1.2)",
-    marginTop: 30,
+    marginTop: 20,
+    marginRight: 40,
   },
   stampCell: {
     width: 28,
@@ -221,6 +226,6 @@ const styles = {
     background: "#fff",
     boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
     textAlign: "center",
-  },  
+  },
 };
 

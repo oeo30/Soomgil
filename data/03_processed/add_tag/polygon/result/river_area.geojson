@@ -4,7 +4,8 @@
     {
       "type": "Feature",
       "properties": {
-        "type": "river"
+        "type": "river",
+        "name": "중랑천"
       },
       "geometry": {
         "type": "Polygon",
@@ -185,7 +186,8 @@
     {
       "type": "Feature",
       "properties": {
-        "type": "river"
+        "type": "river",
+        "name": "청계천"
       },
       "geometry": {
         "type": "Polygon",
@@ -250,7 +252,8 @@
     {
       "type": "Feature",
       "properties": {
-        "type": "river"
+        "type": "river",
+        "name": "성북천"
       },
       "geometry": {
         "type": "Polygon",
@@ -331,7 +334,8 @@
     {
       "type": "Feature",
       "properties": {
-        "type": "river"
+        "type": "river",
+        "name": "정릉천"
       },
       "geometry": {
         "type": "Polygon",

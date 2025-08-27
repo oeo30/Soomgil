@@ -3,7 +3,7 @@ from scipy.spatial import KDTree
 import json
 
 # 파일 경로
-with open('data/01_raw/edges.geojson', encoding='utf-8') as f:
+with open('data/03_processed/add_edge/final_edges.geojson', encoding='utf-8') as f:
     geo = json.load(f)
 trees = pd.read_csv('data/02_intermediate/street-tree-simple.csv')
 

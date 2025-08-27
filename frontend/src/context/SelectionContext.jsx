@@ -4,19 +4,21 @@ const SelectionContext = createContext(null);
 const KEY = "soomgil.selection";
 
 export function SelectionProvider({ children }) {
-  const [season, setSeason] = useState(null);
-  const [length, setLength] = useState(null);
-  const [structure, setStructure] = useState(null);
+  // 시작 위치 좌표 {lat, lng}
+  const [startLocation, setStartLocation] = useState(null);
 
+  // 소요 시간 (분) → 최소 5 이상
+  const [duration, setDuration] = useState(null);
+
+  // 초기 로컬스토리지 복구
   useEffect(() => {
     try {
       const raw = localStorage.getItem(KEY);
       if (raw) {
         const saved = JSON.parse(raw);
         if (saved && typeof saved === "object") {
-          setSeason(saved.season ?? null);
-          setLength(saved.length ?? null);
-          setStructure(saved.structure ?? null);
+          setStartLocation(saved.startLocation ?? null);
+          setDuration(saved.duration ?? null);
         }
       }
     } catch (e) {
@@ -24,30 +26,33 @@ export function SelectionProvider({ children }) {
     }
   }, []);
 
+  // 값이 바뀔 때마다 로컬스토리지 저장
   useEffect(() => {
     try {
-      const data = { season, length, structure };
+      const data = { startLocation, duration };
       localStorage.setItem(KEY, JSON.stringify(data));
     } catch (e) {
       console.warn("[SelectionContext] persist failed:", e);
     }
-  }, [season, length, structure]);
+  }, [startLocation, duration]);
 
-  const canProceed = Boolean(season && length && structure);
+  // 버튼 활성화 조건 → 시작위치 있고, duration ≥ 5
+  const canProceed = Boolean(startLocation && duration >= 5);
 
+  // Context value
   const value = useMemo(
     () => ({
-      season, setSeason,
-      length, setLength,
-      structure, setStructure,
+      startLocation, setStartLocation,
+      duration, setDuration,
       canProceed,
     }),
-    [season, length, structure, canProceed]
+    [startLocation, duration, canProceed]
   );
 
   return <SelectionContext.Provider value={value}>{children}</SelectionContext.Provider>;
 }
 
+// 훅
 export function useSelection() {
   const ctx = useContext(SelectionContext);
   if (!ctx) throw new Error("useSelection must be used within SelectionProvider");

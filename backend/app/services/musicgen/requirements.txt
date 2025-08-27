@@ -1,6 +1,0 @@
-torch>=2.0.1
-transformers>=4.33.1
-numpy>=1.26.0
-scipy>=1.11.1
-sounddevice>=0.4.6
-requests>=2.31.0

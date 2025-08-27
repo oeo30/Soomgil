@@ -1,7 +1,12 @@
 import requests
 from datetime import datetime
 
-API_KEY = "여기에 키값"
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+API_KEY = os.environ.get("OPENWEATHER_API_KEY")
 BASE_URL = "http://api.openweathermap.org/data/2.5/weather"
 
 def get_weather(city="Seoul", country="KR"):

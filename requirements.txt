@@ -61,7 +61,7 @@ nbclient==0.10.2
 nbformat==5.10.4
 nest-asyncio==1.6.0
 networkx==3.5
-numpy==1.21.6
+numpy
 openai==1.102.0
 packaging==25.0
 pandas==2.3.2

@@ -76,15 +76,16 @@ for item in poi_tree_list:
     
     # 경로별 이모티콘 매칭
     emoji = ""  # 기본값 (이모티콘 없음)
-    if "배봉산" in path_name or "mountain" in path_name.lower():
+    if "mountain" in path_name.lower():
         emoji = "🟢"  # 초록색 (산)
-    elif "중랑천" in path_name or "river" in path_name.lower():
+    elif "river" in path_name.lower():
         emoji = "🔵"  # 파란색 (하천)
-    elif "공원" in path_name or "park" in path_name.lower():
+    elif "park" in path_name.lower():
         emoji = "🟠"  # 주황색 (공원)
     
     # 이모티콘이 있으면 추가, 없으면 경로명만
-    display_name = f"{emoji} {path_name}" if emoji else path_name
+    display_name = f"{emoji} {path_name}"
+    display_name = display_name.split("-")[0]
     
     description_results.append({
         "path_name": display_name,

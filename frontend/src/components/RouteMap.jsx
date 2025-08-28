@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -7,6 +7,7 @@ export default function RouteMap({ geojsonData, startLocation }) {
   const mapRef = useRef(null);
   const linesRef = useRef([]);
   const markersRef = useRef([]);
+  const [mapLoaded, setMapLoaded] = useState(false);
 
   useEffect(() => {
     if (!mapDivRef.current) return;
@@ -20,6 +21,11 @@ export default function RouteMap({ geojsonData, startLocation }) {
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         attribution: "&copy; OpenStreetMap",
       }).addTo(mapRef.current);
+      
+      // 지도 로딩 완료 시 상태 업데이트
+      mapRef.current.whenReady(() => {
+        setMapLoaded(true);
+      });
     }
 
     // 기존 경로들과 마커들 제거
@@ -114,11 +120,29 @@ export default function RouteMap({ geojsonData, startLocation }) {
       ref={mapDivRef}
       style={{
         height: 360,
+        width: "100%",
         borderRadius: 12,
         overflow: "hidden",
         border: "1px solid #eee",
+        backgroundColor: "#f0f0f0", // 배경색 추가로 지도 영역 확인
+        minHeight: 360, // 최소 높이 보장
+        position: "relative",
       }}
-    />
+    >
+      {!mapLoaded && (
+        <div style={{
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          color: "#666",
+          fontSize: "16px",
+          fontFamily: "MyCustomFont"
+        }}>
+          지도를 로딩 중입니다...
+        </div>
+      )}
+    </div>
   );
 }
 

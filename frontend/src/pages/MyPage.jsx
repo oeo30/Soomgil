@@ -1,4 +1,8 @@
+import { useNavigate } from "react-router-dom";
+
 export default function MyPage() {
+  const nav = useNavigate();
+
   const nickname = "디디미";
   const profileImg = "/account.png"; // public 폴더에 넣고 "/파일명"으로 불러오기
   const badge = "🥇 초보 산책러";
@@ -63,8 +67,8 @@ export default function MyPage() {
     "/stamps/12.출동.png",
   ];
 
-  // 총 50칸 (5x10)
-  const totalSlots = 25;
+  // 총 10칸
+  const totalSlots = 15;
   const stampArray = Array.from({ length: totalSlots }).map((_, i) => {
     if (i < stamps) {
       const randIdx = Math.floor(Math.random() * stampImgs.length);
@@ -76,6 +80,14 @@ export default function MyPage() {
 
   return (
     <div style={styles.page}>
+      <div style={styles.backBtn}>
+        <button
+          onClick={() => nav("/")} // SetupPage의 경로로 이동
+          className="px-4 py-2 bg-blue-500 text-white rounded-lg shadow"
+        >
+          <span className="mr-2">←</span>
+        </button>
+      </div>
       {/* 상단 프로필 + 스탬프판 */}
       <div style={styles.header}>
         {/* 프로필 섹션 */}
@@ -146,6 +158,9 @@ const styles = {
     justifyContent: "space-between",
     gap: 20,
   },
+  backBtn:{
+    fontSize: 13
+  },
   profileSection: {
     display: "flex",
     flexDirection: "column", // 세로 정렬
@@ -182,8 +197,7 @@ const styles = {
 
   stampBoard: {
     display: "grid",
-    gridTemplateColumns: "repeat(5, 28px)", // 10열
-    gridTemplateRows: "repeat(5, 28px)", // 5행
+    gridTemplateColumns: "repeat(5, 28px)", // 5칸씩 자동 줄바꿈
     gap: 4,
     background: "#f9f9f9",
     padding: 8,
@@ -208,7 +222,7 @@ const styles = {
     border: "2px solid #ccc",
     background: "#fff",
   },
-  subtitle: { fontSize: 50, marginBottom: 16, fontFamily: "MyCustomFont",textShadow: "0.5px 0 black, -0.5px 0 black, 0 0.5px black, 0 -0.5px black", },
+  subtitle: { fontSize: 40, marginBottom: 16, fontFamily: "MyCustomFont",textShadow: "0.5px 0 black, -0.5px 0 black, 0 0.5px black, 0 -0.5px black", },
   recordHeader: {
     fontSize: 30,
     display: "grid",

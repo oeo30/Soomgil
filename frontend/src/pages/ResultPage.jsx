@@ -61,7 +61,7 @@ export default function ResultPage() {
       if (result.description && Array.isArray(result.description)) {
         // 각 경로별 설명 추가
         result.description.forEach((item, index) => {
-          descText += `🗺️ ${item.path_name}\n${item.description}\n\n`;
+          descText += `${item.path_name}\n${item.description}\n\n`;
         });
       } else {
         descText += "완만한 보행로와 휴식 포인트를 고려해 추천된 산책 경로입니다.";
@@ -148,6 +148,5 @@ const styles = {
     fontFamily: "MyCustomFont"
   },
 };
-
 
 

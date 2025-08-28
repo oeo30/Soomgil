@@ -281,13 +281,28 @@ fetch("https://nominatim.openstreetmap.org/search.php?q=동대문구&polygon_geo
 </button>
       {showMoodInput && (
         <div style={{ marginTop: 10, width: "90%" }}>
-          <input
-            type="text"
-           value={mood}
-           onChange={(e) => setMood(e.target.value)}
-            placeholder="오늘의 산책 무드를 입력하세요"
-            style={{...styles.input, width: "60%",}}
-         />
+          <div style={styles.moodOptions}>
+            {[
+              { value: "활기찬", emoji: "⚡", color: "#FF6B6B" },
+              { value: "잔잔한", emoji: "🌊", color: "#4ECDC4" },
+              { value: "상쾌한", emoji: "🌿", color: "#45B7D1" },
+              { value: "몽환적", emoji: "✨", color: "#96CEB4" }
+            ].map((option) => (
+              <button
+                key={option.value}
+                style={{
+                  ...styles.moodOption,
+                  background: mood === option.value ? option.color : "#f0f0f0",
+                  color: mood === option.value ? "#fff" : "#333",
+                  border: mood === option.value ? `2px solid ${option.color}` : "2px solid #ddd"
+                }}
+                onClick={() => setMood(option.value)}
+              >
+                <span style={{ fontSize: "24px", marginRight: "8px" }}>{option.emoji}</span>
+                {option.value}
+              </button>
+            ))}
+          </div>
         </div>
       )}
 
@@ -445,6 +460,30 @@ const styles = {
     color: "#fff",
     cursor: "pointer",
     fontFamily: "MyCustomFont",
+  },
+  moodOptions: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap: "12px",
+    width: "100%",
+    maxWidth: "300px",
+    margin: "0 auto",
+  },
+  moodOption: {
+    padding: "8px 6px",
+    borderRadius: "12px",
+    border: "2px solid #ddd",
+    background: "#f0f0f0",
+    color: "#333",
+    cursor: "pointer",
+    fontSize: "18px",
+    fontFamily: "MyCustomFont",
+    fontWeight: "bold",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    transition: "all 0.2s ease",
+    textShadow: "0.2px 0 #fff, -0.2px 0 #fff, 0 0.2px #fff, 0 -0.2px #fff",
   },
   footerText: { marginTop: 8, fontSize: 14, color: "#888" },
 };

@@ -63,7 +63,7 @@ for item in poi_tree_list:
     path_name = item[0] if item and isinstance(item[0], str) else "경로명 없음"
     trees = item[1] if len(item) > 1 else []
     description = generate_path_description_gemini(
-        path_name=path_name,
+        path_name=path_name.split("-")[0],
         weather=weather_info,
         season=season,
         trees=trees

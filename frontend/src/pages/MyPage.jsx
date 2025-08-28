@@ -75,11 +75,20 @@ export default function MyPage() {
     <div style={styles.page}>
       <div style={styles.backBtn}>
         <button
-          onClick={() => nav("/")} // SetupPage의 경로로 이동
-          className="px-4 py-2 bg-blue-500 text-white rounded-lg shadow"
-        >
-          <span className="mr-2">←</span>
-        </button>
+  onClick={() => nav("/")} // SetupPage의 경로로 이동
+  style={{
+    padding: "4px 8px",       // px-4 py-2
+    backgroundColor: "#ebebebff", // bg-blue-500
+    color: "black",             // text-white
+    borderRadius: "8px",        // rounded-lg
+    border: "none",             // 기본 버튼 테두리 제거
+    cursor: "pointer",
+    textShadow: "0.3px 0 black, -0.3px 0 black, 0 0.3px black, 0 -0.3px black",
+  }}
+>
+  <span style={{ marginRight: "8px" }}>←</span>
+</button>
+
       </div>
       {/* 상단 프로필 + 스탬프판 */}
       <div style={styles.header}>
@@ -164,14 +173,18 @@ const styles = {
   profileImg: {
     width: 150,
     height: 150,
+    marginTop: 30,
+    marginBottom: -10,
     borderRadius: "50%",
-    border: "5px solid #ccc",
+    border: "5px solid #abababff",
     objectFit: "cover",
   },
   nickname: {
     margin: "10px 0 0 0",
     fontSize: 50,
     fontFamily: "MyCustomFont",textShadow: "0.5px 0 black, -0.5px 0 black, 0 0.5px black, 0 -0.5px black",
+    marginTop: -5,
+    marginBottom: -5,
   },
   badge: {
     background: "#FFD700",
@@ -198,8 +211,9 @@ const styles = {
     borderRadius: 12,
     border: "1px solid #ddd",
     transform: "scale(1.2)",
-    marginTop: 40,
-    marginRight: 60,
+    marginTop: 60,
+    marginLeft: 20,
+    marginRight: 40,
   },
   stampCell: {
     width: 28,
@@ -216,9 +230,9 @@ const styles = {
     border: "2px solid #ccc",
     background: "#fff",
   },
-  subtitle: { fontSize: 40, marginBottom: 16, fontFamily: "MyCustomFont",textShadow: "0.5px 0 black, -0.5px 0 black, 0 0.5px black, 0 -0.5px black", },
+  subtitle: { fontSize: 35, marginTop: 0, marginBottom: 0, fontFamily: "MyCustomFont",textShadow: "0.5px 0 black, -0.5px 0 black, 0 0.5px black, 0 -0.5px black", },
   recordHeader: {
-    fontSize: 30,
+    fontSize: 25,
     display: "grid",
     gridTemplateColumns: "1fr 2fr 1fr 3fr",
     fontWeight: "bold",
@@ -227,6 +241,7 @@ const styles = {
     marginBottom: 8,
     textAlign: "center",
     fontFamily: "MyCustomFont",textShadow: "0.5px 0 black, -0.5px 0 black, 0 0.5px black, 0 -0.5px black",
+    whiteSpace: "nowrap",
   },
   recordList: { fontSize: 20, display: "flex", flexDirection: "column", gap: 8, fontFamily: "MyCustomFont",textShadow: "0.3px 0 black, -0.3px 0 black, 0 0.3px black, 0 -0.3px black", },
   recordCard: {

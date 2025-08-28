@@ -9,7 +9,7 @@ import { FaChevronRight, FaChevronDown } from "react-icons/fa";
 
 export default function SetupPage() {
   const nav = useNavigate();
-  const { setStartLocation, duration, setDuration, canProceed, setAddress, address } = useSelection();
+  const { startLocation, setStartLocation, duration, setDuration, canProceed, setAddress, address } = useSelection();
   const { isLoggedIn } = useAuth();
 
   const [showMap, setShowMap] = useState(false);
@@ -316,7 +316,15 @@ fetch("https://nominatim.openstreetmap.org/search.php?q=동대문구&polygon_geo
             fontSize: 16,
           }}
           disabled={!canProceed}
-          onClick={() => nav("/result")}
+          onClick={() => nav("/loading", { 
+            state:{
+              startLocation,
+              duration,
+              mood,
+              address,
+              },
+            })
+          }
         >
           다음으로 ➩
         </button>

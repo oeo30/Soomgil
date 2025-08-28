@@ -95,6 +95,7 @@ export default function SetupPage() {
           mapRef.current.setView(coords, 15);
         }
 
+        console.log('📍 주소 검색으로 위치 설정:', { lat: coords[0], lng: coords[1] });
         setStartLocation({ lat: coords[0], lng: coords[1] });
         await fetchAddress(coords[0], coords[1]);
       } else {
@@ -128,6 +129,10 @@ export default function SetupPage() {
           } else {
             markerRef.current = L.marker(e.latlng).addTo(mapInstance);
           }
+          
+          // 디버깅: 위치 선택 확인
+          console.log('📍 지도에서 위치 선택:', { lat, lng });
+          
           setStartLocation({ lat, lng });
           await fetchAddress(lat, lng);
         });

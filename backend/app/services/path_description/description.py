@@ -1,4 +1,8 @@
+# Cell 1: 라이브러리 임포트 및 설정
 import os
+
+# 환경 변수에서 project_root 가져오기
+project_root = os.environ.get("PROJECT_ROOT", "/Users/taknayeon/Development/Projects/Soomgil")
 import google.generativeai as genai
 from dotenv import load_dotenv
 from weather import get_weather, get_season
@@ -14,6 +18,7 @@ except Exception as e:
     print(f"오류: {e}")
     model = None
 
+# Cell 2: 함수 정의 및 메인 로직
 def generate_path_description_gemini(path_name: str, weather: str, season: str, trees: list) -> str:
     if not model:
         return "Gemini 모델이 초기화되지 않았습니다."
@@ -38,36 +43,57 @@ def generate_path_description_gemini(path_name: str, weather: str, season: str, 
         print(f"Gemini API 호출 중 오류가 발생했습니다: {e}")
         return None
 
-if __name__ == "__main__":
-    weather_info = get_weather(city="Seoul", country="KR")
-    season = get_season()
+# 프로젝트 루트 기준으로 절대 경로 사용
+print(f"🔍 프로젝트 루트: {project_root}")
+print(f"📁 현재 작업 디렉토리: {os.getcwd()}")
 
-    with open("backend/app/services/path_reccomendation/poi_tree_list.json", "r", encoding="utf-8") as f:
-        poi_tree_list = json.load(f)
+weather_info = get_weather(city="Seoul", country="KR")
+season = get_season()
 
-    path_data_list = []
-    for item in poi_tree_list:
-        path_name = item[0] if item and isinstance(item[0], str) else "경로명 없음"
-        trees = item[1] if len(item) > 1 else []
-        description = generate_path_description_gemini(
-            path_name=path_name,
-            weather=weather_info,
-            season=season,
-            trees=trees
-        )
-        print(f"--- {path_name} 설명 ---")
-        if description:
-            print(description)
-        else:
-            print("경로 설명 생성 실패")
-        if 'description_results' not in locals():
-            description_results = []
-        description_results.append({
-            "path_name": path_name,
-            "description": description if description else "경로 설명 생성 실패"
-        })
+# 절대 경로로 poi_tree_list.json 파일 읽기
+poi_tree_path = os.path.join(project_root, "backend/app/services/path_reccomendation/poi_tree_list.json")
+print(f"🔍 poi_tree_list.json 경로: {poi_tree_path}")
 
-    # 모든 경로 설명 결과를 json 파일로 저장
-    with open("backend/app/services/path_description/description_results.json", "w", encoding="utf-8") as f:
-        json.dump(description_results, f, ensure_ascii=False, indent=2)
-    print("description_results.json 파일로 경로별 설명 결과가 저장되었습니다.")
+with open(poi_tree_path, "r", encoding="utf-8") as f:
+    poi_tree_list = json.load(f)
+
+path_data_list = []
+description_results = []
+for item in poi_tree_list:
+    path_name = item[0] if item and isinstance(item[0], str) else "경로명 없음"
+    trees = item[1] if len(item) > 1 else []
+    description = generate_path_description_gemini(
+        path_name=path_name,
+        weather=weather_info,
+        season=season,
+        trees=trees
+    )
+    print(f"--- {path_name} 설명 ---")
+    if description:
+        print(description)
+    else:
+        print("경로 설명 생성 실패")
+    
+    # 경로별 이모티콘 매칭
+    emoji = ""  # 기본값 (이모티콘 없음)
+    if "mountain" in path_name.lower():
+        emoji = "🟢"  # 초록색 (산)
+    elif "river" in path_name.lower():
+        emoji = "🔵"  # 파란색 (하천)
+    elif "park" in path_name.lower():
+        emoji = "🟠"  # 주황색 (공원)
+    
+    # 이모티콘이 있으면 추가, 없으면 경로명만
+    display_name = f"{emoji} {path_name}"
+    display_name = display_name.split("-")[0]
+    
+    description_results.append({
+        "path_name": display_name,
+        "description": description if description else "경로 설명 생성 실패"
+    })
+
+# 모든 경로 설명 결과를 json 파일로 저장
+output_path = os.path.join(project_root, "backend/app/services/path_description/description_results.json")
+with open(output_path, "w", encoding="utf-8") as f:
+    json.dump(description_results, f, ensure_ascii=False, indent=2)
+print(f"✅ description_results.json 파일로 경로별 설명 결과가 저장되었습니다: {output_path}")

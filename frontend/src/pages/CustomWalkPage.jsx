@@ -57,8 +57,9 @@ export default function CustomWalkPage() {
   const handleNext = () => {
     const canvas = canvasRef.current;
     canvas.toBlob((blob) => {
+      console.log("🎨 캔버스 Blob 생성:", blob.size, "bytes");
       nav("/custom-loading", { state: { drawingBlob: blob } });
-    });
+    }, "image/png", 1.0);
   };
 
   return (

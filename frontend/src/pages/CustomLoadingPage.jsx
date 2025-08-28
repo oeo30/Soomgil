@@ -4,28 +4,43 @@ import { useLocation, useNavigate } from "react-router-dom";
 export default function CustomLoadingPage() {
   const location = useLocation();
   const nav = useNavigate();
+  const [isUploading, setIsUploading] = useState(false);
+  const uploadRef = useRef(false);
 
-  // 업로드 로직 (그대로)
+  // 업로드 로직 (중복 호출 방지)
   useEffect(() => {
-    if (!location.state?.drawingBlob) return;
+    if (!location.state?.drawingBlob || isUploading || uploadRef.current) return;
+
+    uploadRef.current = true;
+
+    setIsUploading(true);
+    console.log("🚀 API 호출 시작");
+    console.log("📁 Blob 크기:", location.state.drawingBlob.size, "bytes");
 
     const formData = new FormData();
     formData.append("file", location.state.drawingBlob, "drawing.png");
 
-    fetch("http://localhost:5000/upload", {
+    fetch("http://localhost:5001/api/upload", {
       method: "POST",
       body: formData,
     })
       .then((res) => res.json())
       .then((data) => {
+        console.log("✅ API 응답 받음");
+        console.log("📊 API 응답 데이터:", data);
+        console.log("📊 전달할 result:", data.result);
         nav("/custom-result", { state: { result: data.result } });
       })
       .catch((err) => {
-        console.error(err);
-        // alert("경로 생성에 실패했습니다.");
-        // nav("/custom-walk");
+        console.error("❌ API 오류:", err);
+        alert("경로 생성에 실패했습니다.");
+        nav("/custom-walk");
+      })
+      .finally(() => {
+        setIsUploading(false);
+        uploadRef.current = false;
       });
-  }, [location.state, nav]);
+  }, [location.state?.drawingBlob]); // nav 제거, drawingBlob만 의존
 
   // 렌더링할 이미지들
   const SPRITES = useMemo(

@@ -174,37 +174,39 @@ def recommend_route():
             os.chdir(original_cwd)
             print("✅ 경로 생성 노트북 실행 완료")
             
+            # 2. 경로 설명 생성 (description.py 실행)
+            try:
+                print("📝 description.py로 경로 설명 생성")
+                
+                # 현재 작업 디렉토리를 프로젝트 루트로 변경
+                original_cwd = os.getcwd()
+                project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+                os.chdir(project_root)
+                print(f"📁 작업 디렉토리 변경: {os.getcwd()}")
+                
+                # 출력 폴더 생성
+                output_dir = os.path.join(project_root, 'backend/app/services/path_description')
+                os.makedirs(output_dir, exist_ok=True)
+                
+                # description.py 실행
+                subprocess.run([
+                    'python', 
+                    'backend/app/services/path_description/description.py'
+                ], check=True, cwd=project_root, env=dict(os.environ, PROJECT_ROOT=project_root))
+                
+                # 원래 디렉토리로 복원
+                os.chdir(original_cwd)
+                print("✅ 경로 설명 생성 완료")
+                
+            except Exception as e:
+                print(f"❌ 경로 설명 생성 실패: {e}")
+                print("🔄 Mock 설명으로 폴백")
+            
         except Exception as e:
             print(f"❌ 경로 생성 노트북 실행 실패: {e}")
             print("🔄 Mock 데이터로 폴백")
         
-        # 2. 경로 설명 생성 (실제 노트북 실행)
-        try:
-            print("📝 실제 노트북으로 경로 설명 생성")
-            
-            # 현재 작업 디렉토리를 프로젝트 루트로 변경
-            original_cwd = os.getcwd()
-            project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-            os.chdir(project_root)
-            print(f"📁 작업 디렉토리 변경: {os.getcwd()}")
-            
-            # 출력 폴더 생성
-            output_dir = os.path.join(project_root, 'backend/app/services/path_description')
-            os.makedirs(output_dir, exist_ok=True)
-            
-            # 노트북 실행
-            pm.execute_notebook(
-                'backend/app/services/path_description/description.ipynb',
-                'backend/app/services/path_description/description_out.ipynb'
-            )
-            
-            # 원래 디렉토리로 복원
-            os.chdir(original_cwd)
-            print("✅ 경로 설명 노트북 실행 완료")
-            
-        except Exception as e:
-            print(f"❌ 경로 설명 노트북 실행 실패: {e}")
-            print("🔄 Mock 설명으로 폴백")
+
         
         # 3. 실제 결과 파일 읽기
         try:

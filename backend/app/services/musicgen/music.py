@@ -1,6 +1,5 @@
 import os
 import time
-import sys
 from weather import get_weather
 from transformers import AutoProcessor, MusicgenForConditionalGeneration
 import torch
@@ -25,13 +24,12 @@ weather_map = {
 
 weather_en = weather_map.get(weather_info["description"], "clear")
 
-# mood를 커맨드라인 인자로 받음 (확인필요)
-mood = sys.argv[1] if len(sys.argv) > 1 else "mysterious and cinematic"
+# user_input 설정
 user_input = {
     "weather": weather_en,
     "season": weather_info["season"],
     "activity": "walking",
-    "mood": mood
+    "mood": "mysterious and cinematic"
 }
 
 # 프롬프트 생성
@@ -56,7 +54,7 @@ tokens_per_sec = 16
 MAX_TOKENS_MODEL = 1024  # small 모델 안전 최대 토큰 2048
 
 tokens_per_generate = min(walk_minutes * 60 * tokens_per_sec, MAX_TOKENS_MODEL)
-print(f"✅ 생성 토큰: {tokens_per_generate} tokens (모델 안전 범위 내)")
+print(f"✅ 생성 토큰: {tokens_per_generate} tokens")
 
 # 오디오 생성
 inputs = processor(text=[prompt], return_tensors="pt").to(musicgen_model.device)
@@ -70,15 +68,8 @@ normalized = audio_array / np.max(np.abs(audio_array))
 int16_audio = (normalized * 32767).astype(np.int16)
 
 # 출력 폴더 및 WAV 저장
-output_path = "backend/app/services/musicgen/generated_music.wav"
-os.makedirs(os.path.dirname(output_path), exist_ok=True)
+output_dir = "musicgen_output"
+os.makedirs(output_dir, exist_ok=True)
+output_path = os.path.join(output_dir, "generated_music.wav")
 scipy.io.wavfile.write(output_path, rate=32000, data=int16_audio)
 print(f"✅ 음악 생성 완료! 저장됨 → {output_path}")
-
-# 반복 재생
-#repeat_times = walk_minutes  # 1분당 1번 반복
-#for i in range(repeat_times):
-#    print(f"▶ 재생 {i+1}/{repeat_times}")
-#    sd.play(normalized.astype("float32"), samplerate=32000)
-#    sd.wait()
-#    time.sleep(0.5)  # 반복 사이 잠깐 대기

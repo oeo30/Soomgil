@@ -10,20 +10,21 @@ export default function CustomWalkPage() {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
 
-    const ratio = window.devicePixelRatio || 1;
     const width = 400;
     const height = 400;
 
-    // 내부 해상도 고해상도로 맞춤
-    canvas.width = width * ratio;
-    canvas.height = height * ratio;
+    // 캔버스 크기를 CSS 크기와 동일하게 설정
+    canvas.width = width;
+    canvas.height = height;
 
     // CSS 고정 크기
     canvas.style.width = width + "px";
     canvas.style.height = height + "px";
 
-    // 좌표계 스케일 보정
-    ctx.scale(ratio, ratio);
+    // 기본 스타일 설정
+    ctx.lineWidth = 2;
+    ctx.lineCap = "round";
+    ctx.strokeStyle = "black";
   }, []);
 
   const startDrawing = () => setDrawing(true);
@@ -34,25 +35,23 @@ export default function CustomWalkPage() {
   };
 
   const draw = (e) => {
-  if (!drawing) return;
-  const canvas = canvasRef.current;
-  const ctx = canvas.getContext("2d");
-  const rect = canvas.getBoundingClientRect();
+    if (!drawing) return;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    const rect = canvas.getBoundingClientRect();
 
-  const ratio = window.devicePixelRatio || 1;
+    // 마우스 좌표를 캔버스 좌표로 변환 (CSS 크기 기준)
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
 
-  // 좌표 보정 (배율 나눠주기)
-  const x = (e.clientX - rect.left) / ratio;
-  const y = (e.clientY - rect.top) / ratio;
-
-  ctx.lineWidth = 2;
-  ctx.lineCap = "round";
-  ctx.strokeStyle = "black";
-  ctx.lineTo(x, y);
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(x, y);
-};
+    ctx.lineWidth = 2;
+    ctx.lineCap = "round";
+    ctx.strokeStyle = "black";
+    ctx.lineTo(x, y);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+  };
 
 
   const handleNext = () => {
@@ -70,7 +69,6 @@ export default function CustomWalkPage() {
           marginTop: 40,
           fontSize: 40,
           fontFamily: "MyCustomFont",
-          fontWeight: "bold",
           textShadow:
             "0.5px 0 black, -0.5px 0 black, 0 0.5px black, 0 -0.5px black",
         }}
@@ -84,10 +82,11 @@ export default function CustomWalkPage() {
           marginTop: -5,
           marginBottom: 20,
           fontSize: 20,
+          color: "#555",
           fontFamily: "MyCustomFont",
           fontWeight: "500",
           textShadow:
-            "0.3px 0 black, -0.3px 0 black, 0 0.3px black, 0 -0.3px black",
+            "0.3px 0 #555, -0.3px 0 #555, 0 0.3px #555, 0 -0.3px #555",
         }}
       >
         그림으로 만드는 나만의 산책로
@@ -106,11 +105,29 @@ export default function CustomWalkPage() {
           height: "400px",
           border: "2px solid black",
           borderRadius: "16px",
-          boxSizing: "border-box"
+          boxSizing: "border-box",
+          touchAction: "none" // 터치 스크롤 방지
         }}
         onMouseDown={startDrawing}
         onMouseUp={stopDrawing}
         onMouseMove={draw}
+        onTouchStart={(e) => {
+          e.preventDefault();
+          startDrawing();
+        }}
+        onTouchEnd={(e) => {
+          e.preventDefault();
+          stopDrawing();
+        }}
+        onTouchMove={(e) => {
+          e.preventDefault();
+          const touch = e.touches[0];
+          const mouseEvent = new MouseEvent('mousemove', {
+            clientX: touch.clientX,
+            clientY: touch.clientY
+          });
+          draw(mouseEvent);
+        }}
       />
 
       {/* 버튼 */}
@@ -139,5 +156,4 @@ export default function CustomWalkPage() {
     </div>
   );
 }
-
 

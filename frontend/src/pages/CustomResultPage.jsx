@@ -39,9 +39,19 @@ export default function CustomResultPage() {
 
 
   return (
-    <div style={{ textAlign: "center", padding: 20, fontFamily: "MyCustomFont" }}>
-      <h1>생성된 산책로</h1>
-      <div id="map" style={{ height: 400, width: "100%", marginTop: 20 }}></div>
+    <div style={{ textAlign: "center", padding: 20, marginTop: 40,}}>
+      <h1
+        style={{
+          marginTop: 30,
+          fontSize: 60,
+          color: "black",
+          fontFamily: "MyCustomFont",
+          textShadow:
+            "0.5px 0 black, -0.5px 0 black, 0 0.5px black, 0 -0.5px black",
+        }}
+      >나만의 산책로
+      </h1>
+      <div id="map" style={{ height: 400, width: "100%", marginTop: -10 }}></div>
     </div>
   );
 }

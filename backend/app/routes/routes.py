@@ -4,6 +4,10 @@ import json
 import os
 import subprocess
 import papermill as pm
+from werkzeug.utils import secure_filename
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'services', 'path_image'))
+from image_path_enhanced import generate_custom_route
 
 @api_bp.route('/health', methods=['GET'])
 def health_check():
@@ -263,3 +267,104 @@ def get_statistics():
         
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@api_bp.route('/upload', methods=['POST'])
+def upload_image():
+    """이미지 업로드 및 커스텀 경로 생성"""
+    try:
+        if 'file' not in request.files:
+            return jsonify({"error": "파일이 없습니다"}), 400
+        
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({"error": "파일이 선택되지 않았습니다"}), 400
+        
+        # 파일 저장
+        filename = secure_filename(file.filename)
+        upload_dir = os.path.join(os.path.dirname(__file__), '..', 'services', 'path_image', 'uploads')
+        os.makedirs(upload_dir, exist_ok=True)
+        
+        file_path = os.path.join(upload_dir, filename)
+        file.save(file_path)
+        
+        # 흰 배경 추가
+        try:
+            from PIL import Image
+            import numpy as np
+            
+            # 이미지 로드
+            img = Image.open(file_path)
+            
+            # RGBA 모드인 경우 RGB로 변환 (흰 배경 추가)
+            if img.mode == 'RGBA':
+                # 흰 배경 이미지 생성
+                white_bg = Image.new('RGB', img.size, (255, 255, 255))
+                # 원본 이미지를 흰 배경 위에 합성
+                white_bg.paste(img, mask=img.split()[-1])  # 알파 채널을 마스크로 사용
+                img = white_bg
+            
+            # RGB로 변환 (투명도가 있는 경우)
+            if img.mode != 'RGB':
+                img = img.convert('RGB')
+            
+            # 저장
+            img.save(file_path, 'PNG')
+            print(f"✅ 흰 배경 추가 완료: {file_path}")
+            
+        except Exception as e:
+            print(f"⚠️ 흰 배경 추가 실패 (계속 진행): {e}")
+        
+        print(f"✅ 이미지 업로드 완료: {file_path}")
+        print(f"📁 파일 존재 여부: {os.path.exists(file_path)}")
+        print(f"📁 파일 크기: {os.path.getsize(file_path)} bytes")
+        
+        # 커스텀 경로 생성
+        try:
+            # 현재 작업 디렉토리를 프로젝트 루트로 변경
+            original_cwd = os.getcwd()
+            project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+            os.chdir(project_root)
+            
+            # path_image 시스템 실행
+            output_dir = os.path.join(project_root, 'backend/app/services/path_image/outputs')
+            os.makedirs(output_dir, exist_ok=True)
+            
+            # 작업 디렉토리를 path_image 폴더로 변경
+            path_image_dir = os.path.join(project_root, 'backend/app/services/path_image')
+            os.chdir(path_image_dir)
+            
+            try:
+                print(f"🖼️ generate_custom_route 호출: {file_path}")
+                geojson_path = generate_custom_route(
+                    image_path=file_path,
+                    target_len=5000,  # 5km
+                    output_dir=output_dir
+                )
+            finally:
+                # 원래 디렉토리로 복원
+                os.chdir(original_cwd)
+            
+            if geojson_path and os.path.exists(geojson_path):
+                # GeoJSON 파일 읽기
+                with open(geojson_path, 'r', encoding='utf-8') as f:
+                    geojson_data = json.load(f)
+                
+                print(f"✅ 커스텀 경로 생성 완료: {geojson_path}")
+                
+                return jsonify({
+                    'success': True,
+                    'result': geojson_data,
+                    'message': '커스텀 경로가 성공적으로 생성되었습니다.'
+                })
+            else:
+                return jsonify({"error": "경로 생성에 실패했습니다"}), 500
+                
+        except Exception as e:
+            print(f"❌ 경로 생성 실패: {e}")
+            import traceback
+            print(f"상세 에러: {traceback.format_exc()}")
+            return jsonify({"error": f"경로 생성 중 오류 발생: {str(e)}"}), 500
+            
+    except Exception as e:
+        print(f"❌ 업로드 실패: {e}")
+        return jsonify({"error": f"업로드 중 오류 발생: {str(e)}"}), 500

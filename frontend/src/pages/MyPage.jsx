@@ -56,19 +56,12 @@ export default function MyPage() {
 
   // 스탬프 이미지들 (public 폴더에 넣기)
   const stampImgs = [
-    "/stamps/1.인사.png",
-    "/stamps/2.안내.png",
-    "/stamps/3.최고.png",
-    "/stamps/5.사랑.png",
-    "/stamps/7.교육.png",
-    "/stamps/8.응원.png",
-    "/stamps/10.축하.png",
-    "/stamps/11.감사.png",
-    "/stamps/12.출동.png",
+    "/stamps/stamp1.png",
+    "/stamps/stamp2.png"
   ];
 
   // 총 10칸
-  const totalSlots = 15;
+  const totalSlots = 24;
   const stampArray = Array.from({ length: totalSlots }).map((_, i) => {
     if (i < stamps) {
       const randIdx = Math.floor(Math.random() * stampImgs.length);
@@ -172,6 +165,7 @@ const styles = {
     width: 150,
     height: 150,
     borderRadius: "50%",
+    border: "5px solid #ccc",
     objectFit: "cover",
   },
   nickname: {
@@ -197,15 +191,15 @@ const styles = {
 
   stampBoard: {
     display: "grid",
-    gridTemplateColumns: "repeat(5, 28px)", // 5칸씩 자동 줄바꿈
+    gridTemplateColumns: "repeat(4, 28px)", // 5칸씩 자동 줄바꿈
     gap: 4,
     background: "#f9f9f9",
     padding: 8,
     borderRadius: 12,
     border: "1px solid #ddd",
     transform: "scale(1.2)",
-    marginTop: 20,
-    marginRight: 40,
+    marginTop: 40,
+    marginRight: 60,
   },
   stampCell: {
     width: 28,

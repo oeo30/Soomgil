@@ -56,9 +56,16 @@ export default function ResultPage() {
       });
       
       // 설명 설정
-      const descText = `출발지: ${address || "미지정"}
-소요 시간: ${duration ?? "미지정"}분
-${result.description?.description || "완만한 보행로와 휴식 포인트를 고려해 추천된 산책 경로입니다."}`;
+      let descText = `출발지: ${address || "미지정"}\n소요 시간: ${duration ?? "미지정"}분\n\n`;
+      
+      if (result.description && Array.isArray(result.description)) {
+        // 각 경로별 설명 추가
+        result.description.forEach((item, index) => {
+          descText += `🗺️ ${item.path_name}\n${item.description}\n\n`;
+        });
+      } else {
+        descText += "완만한 보행로와 휴식 포인트를 고려해 추천된 산책 경로입니다.";
+      }
       
       setDescription(descText);
       

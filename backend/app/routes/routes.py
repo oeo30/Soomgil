@@ -195,8 +195,7 @@ def recommend_route():
             # 노트북 실행
             pm.execute_notebook(
                 'backend/app/services/path_description/description.ipynb',
-                'backend/app/services/path_description/description_out.ipynb',
-                parameters=dict(start_lat=lat, start_lon=lon, walk_km=walk_km, season=season)
+                'backend/app/services/path_description/description_out.ipynb'
             )
             
             # 원래 디렉토리로 복원

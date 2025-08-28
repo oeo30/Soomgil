@@ -305,11 +305,10 @@ fetch("https://nominatim.openstreetmap.org/search.php?q=동대문구&polygon_geo
           </div>
         </div>
       )}
-
         <button
           style={{
             ...styles.btn,
-            background: canProceed ? "#e2a06eff" : "#aaa",
+            background: canProceed ? "rgba(58,137,62,0.7)" : "#aaa",
             marginTop: 2,
             borderRadius: "999px",
             padding: "12px 24px",
@@ -352,7 +351,8 @@ const styles = {
     borderRadius: 6,
     border: "1px solid #ddd",
     background: "#fff",
-    fontSize: 12,
+    fontFamily: "MyCustomFont",
+    fontSize: 20,
     cursor: "pointer",
   },
 
@@ -459,6 +459,7 @@ const styles = {
     background: "rgba(58,137,62,0.7)",
     color: "#fff",
     cursor: "pointer",
+    fontSize: 14,
     fontFamily: "MyCustomFont",
   },
   moodOptions: {

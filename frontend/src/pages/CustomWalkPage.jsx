@@ -34,22 +34,26 @@ export default function CustomWalkPage() {
   };
 
   const draw = (e) => {
-    if (!drawing) return;
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
-    const rect = canvas.getBoundingClientRect();
+  if (!drawing) return;
+  const canvas = canvasRef.current;
+  const ctx = canvas.getContext("2d");
+  const rect = canvas.getBoundingClientRect();
 
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+  const ratio = window.devicePixelRatio || 1;
 
-    ctx.lineWidth = 2;
-    ctx.lineCap = "round";
-    ctx.strokeStyle = "black";
-    ctx.lineTo(x, y);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-  };
+  // 좌표 보정 (배율 나눠주기)
+  const x = (e.clientX - rect.left) / ratio;
+  const y = (e.clientY - rect.top) / ratio;
+
+  ctx.lineWidth = 2;
+  ctx.lineCap = "round";
+  ctx.strokeStyle = "black";
+  ctx.lineTo(x, y);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+};
+
 
   const handleNext = () => {
     const canvas = canvasRef.current;
@@ -135,4 +139,5 @@ export default function CustomWalkPage() {
     </div>
   );
 }
+
 

@@ -109,3 +109,23 @@ html, body {
   overscroll-behavior: contain;
   padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 100px); /* 하단 여백 증가 */
 }
+
+/* 스크롤바 숨기기 */
+#root::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
+}
+
+#root::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#root::-webkit-scrollbar-thumb {
+  background: transparent;
+}
+
+/* Firefox용 스크롤바 숨기기 */
+#root {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}

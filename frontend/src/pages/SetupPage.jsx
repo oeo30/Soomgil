@@ -295,16 +295,30 @@ fetch("https://nominatim.openstreetmap.org/search.php?q=동대문구&polygon_geo
           style={{
             ...styles.btn,
             background: canProceed ? "#e2a06eff" : "#aaa",
-            marginTop: 20,
+            marginTop: 2,
             borderRadius: "999px",
             padding: "12px 24px",
             width: "auto",
+            fontSize: 16,
           }}
           disabled={!canProceed}
           onClick={() => nav("/result")}
         >
           다음으로 ➩
         </button>
+        <button
+        style={{
+          ...styles.btn,
+          marginTop: 40,
+          padding: "12px 24px",
+          width: "auto",
+          fontSize: 22,
+          background: "#e0a55eff",
+        }}
+        onClick={() => nav("/custom-walk")}
+      >
+        나만의 산책로 만들기
+      </button>
       </div>
     </div>
   );
@@ -337,7 +351,7 @@ const styles = {
   sun: {
     position: "absolute",
     top: 0,
-    left: 25,
+    left: 5,
     width: 60,
     zIndex: 1,
   },

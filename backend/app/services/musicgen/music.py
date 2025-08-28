@@ -1,5 +1,6 @@
 import os
 import time
+import sys
 from weather import get_weather
 from transformers import AutoProcessor, MusicgenForConditionalGeneration
 import torch
@@ -24,12 +25,13 @@ weather_map = {
 
 weather_en = weather_map.get(weather_info["description"], "clear")
 
-# user_input 설정
+# mood를 커맨드라인 인자로 받음 (확인필요)
+mood = sys.argv[1] if len(sys.argv) > 1 else "mysterious and cinematic"
 user_input = {
     "weather": weather_en,
     "season": weather_info["season"],
     "activity": "walking",
-    "mood": "mysterious and cinematic"
+    "mood": mood
 }
 
 # 프롬프트 생성
@@ -48,23 +50,31 @@ processor = AutoProcessor.from_pretrained("facebook/musicgen-small")
 musicgen_model = MusicgenForConditionalGeneration.from_pretrained("facebook/musicgen-small")
 musicgen_model.to("cuda" if torch.cuda.is_available() else "cpu")
 
-def generate_music(prompt: str, duration_minutes: int = 1, output_path="generated_music.wav"):
-    tokens_per_sec = 16
-    MAX_TOKENS_MODEL = 1024
-    tokens_per_generate = min(duration_minutes * 60 * tokens_per_sec, MAX_TOKENS_MODEL)
+# 산책 시간 기반 안전 토큰 계산
+walk_minutes = 10  # 원하는 산책 시간
+tokens_per_sec = 16
+MAX_TOKENS_MODEL = 1024  # small 모델 안전 최대 토큰 2048
 
-    inputs = processor(text=[prompt], return_tensors="pt").to(musicgen_model.device)
-    audio_values = musicgen_model.generate(**inputs, max_new_tokens=tokens_per_generate)
+tokens_per_generate = min(walk_minutes * 60 * tokens_per_sec, MAX_TOKENS_MODEL)
+print(f"✅ 생성 토큰: {tokens_per_generate} tokens (모델 안전 범위 내)")
 
-    audio_array = audio_values[0].cpu().numpy()
-    if audio_array.ndim > 1:
-        audio_array = audio_array.squeeze()
+# 오디오 생성
+inputs = processor(text=[prompt], return_tensors="pt").to(musicgen_model.device)
+audio_values = musicgen_model.generate(**inputs, max_new_tokens=tokens_per_generate)
+audio_array = audio_values[0].cpu().numpy()
+if audio_array.ndim > 1:
+    audio_array = audio_array.squeeze()
 
-    normalized = audio_array / np.max(np.abs(audio_array))
-    int16_audio = (normalized * 32767).astype(np.int16)
+# float → int16 변환
+normalized = audio_array / np.max(np.abs(audio_array))
+int16_audio = (normalized * 32767).astype(np.int16)
 
-    scipy.io.wavfile.write(output_path, rate=32000, data=int16_audio)
-    return output_path
+# 출력 폴더 및 WAV 저장
+output_path = "backend/app/services/musicgen/generated_music.wav"
+os.makedirs(os.path.dirname(output_path), exist_ok=True)
+scipy.io.wavfile.write(output_path, rate=32000, data=int16_audio)
+print(f"✅ 음악 생성 완료! 저장됨 → {output_path}")
+
 # 반복 재생
 #repeat_times = walk_minutes  # 1분당 1번 반복
 #for i in range(repeat_times):

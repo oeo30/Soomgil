@@ -61,7 +61,7 @@ export default function MyPage() {
   ];
 
   // 총 10칸
-  const totalSlots = 24;
+  const totalSlots = 10;
   const stampArray = Array.from({ length: totalSlots }).map((_, i) => {
     if (i < stamps) {
       const randIdx = Math.floor(Math.random() * stampImgs.length);
@@ -75,44 +75,45 @@ export default function MyPage() {
     <div style={styles.page}>
       <div style={styles.backBtn}>
         <button
-  onClick={() => nav("/")} // SetupPage의 경로로 이동
-  style={{
-    padding: "4px 8px",       // px-4 py-2
-    backgroundColor: "#ebebebff", // bg-blue-500
-    color: "black",             // text-white
-    borderRadius: "8px",        // rounded-lg
-    border: "none",             // 기본 버튼 테두리 제거
-    cursor: "pointer",
-    textShadow: "0.3px 0 black, -0.3px 0 black, 0 0.3px black, 0 -0.3px black",
-  }}
->
-  <span style={{ marginRight: "8px" }}>←</span>
-</button>
-
+          onClick={() => nav("/")} // SetupPage의 경로로 이동
+          style={{
+            padding: "4px 8px",       // px-4 py-2
+            backgroundColor: "#ebebebff", // bg-blue-500
+            color: "black",             // text-white
+            borderRadius: "8px",        // rounded-lg
+            border: "none",             // 기본 버튼 테두리 제거
+            cursor: "pointer",
+            textShadow: "0.3px 0 black, -0.3px 0 black, 0 0.3px black, 0 -0.3px black",
+          }}
+        >
+          <span style={{ marginRight: "8px" }}>←</span>
+        </button>
       </div>
       {/* 상단 프로필 + 스탬프판 */}
       <div style={styles.header}>
-        {/* 프로필 섹션 */}
-        <div style={styles.profileSection}>
+        {/* 왼쪽 영역: 프로필 */}
+        <div style={styles.leftSection}>
           <img src={profileImg} alt="프로필" style={styles.profileImg} />
           <h2 style={styles.nickname}>{nickname}</h2>
-          <span style={styles.badge}>{badge}</span>
+        </div>
+
+        {/* 오른쪽 영역: 총 시간 + 스탬프판 + 배지 */}
+        <div style={styles.rightSection}>
           <span style={styles.totalTime}>
             총 산책 시간: {formatTime(totalWalkTime)}
           </span>
-        </div>
-
-        {/* 스탬프판 */}
-        <div style={styles.stampBoard}>
-          {stampArray.map((item, idx) => (
-            <div key={idx} style={styles.stampCell}>
-              {item.type === "stamp" ? (
-                <img src={item.src} alt="스탬프" style={styles.stampImg} />
-              ) : (
-                <div style={styles.emptyStamp}></div>
-              )}
-            </div>
-          ))}
+          <div style={styles.stampBoard}>
+            {stampArray.map((item, idx) => (
+              <div key={idx} style={styles.stampCell}>
+                {item.type === "stamp" ? (
+                  <img src={item.src} alt="스탬프" style={styles.stampImg} />
+                ) : (
+                  <div style={styles.emptyStamp}></div>
+                )}
+              </div>
+            ))}
+          </div>
+          <span style={styles.badge}>{badge}</span>
         </div>
       </div>
 
@@ -157,18 +158,25 @@ const styles = {
   header: {
     display: "flex",
     alignItems: "flex-start",
-    justifyContent: "space-between",
-    gap: 20,
+    justifyContent: "flex-start",
+    gap: 50,
   },
   backBtn:{
     fontSize: 13
   },
-  profileSection: {
+  leftSection: {
     display: "flex",
     flexDirection: "column", // 세로 정렬
     alignItems: "center",
     gap: 8,
     width: 200,
+  },
+  rightSection: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "flex-start",
+    gap: 8,
+    marginTop: 20,
   },
   profileImg: {
     width: 150,
@@ -195,6 +203,7 @@ const styles = {
     fontWeight: "bold",
     display: "inline-block",
     width: "fit-content",
+    marginTop: 20,
   },
   totalTime: {
     marginTop: 4,
@@ -204,16 +213,14 @@ const styles = {
 
   stampBoard: {
     display: "grid",
-    gridTemplateColumns: "repeat(4, 28px)", // 5칸씩 자동 줄바꿈
+    gridTemplateColumns: "repeat(5, 28px)", // 5칸씩 자동 줄바꿈
     gap: 4,
     background: "#f9f9f9",
     padding: 8,
     borderRadius: 12,
     border: "1px solid #ddd",
     transform: "scale(1.2)",
-    marginTop: 60,
-    marginLeft: 20,
-    marginRight: 40,
+    marginTop: 15,
   },
   stampCell: {
     width: 28,

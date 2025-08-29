@@ -91,20 +91,38 @@ export default function CustomResultPage() {
 }, [map]);
 
 
-  return (
-    <div style={{ textAlign: "center", padding: 20, marginTop: 40,}}>
-      <h1
-        style={{
-          marginTop: 30,
-          fontSize: 60,
-          color: "black",
-          fontFamily: "MyCustomFont",
-          textShadow:
-            "0.5px 0 black, -0.5px 0 black, 0 0.5px black, 0 -0.5px black",
-        }}
-      >나만의 산책로
-      </h1>
-      <div id="map" style={{ height: 400, width: "100%", marginTop: -10 }}></div>
-    </div>
-  );
+return (
+  <div style={{ textAlign: "center", padding: 20, marginTop: 40, position: "relative" }}>
+    {/* 우상단 버튼 */}
+    <button
+      onClick={() => navigate("/")}
+      style={{
+        position: "absolute",
+        top: 20,
+        left: 20,
+        padding: "6px 12px",
+        backgroundColor: "#dadadaff",
+        borderRadius: "6px",
+        cursor: "pointer",
+        fontSize: "14px",
+      }}
+    >
+      ← 
+    </button>
+
+    <h1
+      style={{
+        marginTop: 30,
+        fontSize: 60,
+        color: "black",
+        fontFamily: "MyCustomFont",
+        textShadow: "0.5px 0 black, -0.5px 0 black, 0 0.5px black, 0 -0.5px black",
+      }}
+    >
+      나만의 산책로
+    </h1>
+
+    <div id="map" style={{ height: 400, width: "100%", marginTop: -10 }}></div>
+  </div>
+);
 }

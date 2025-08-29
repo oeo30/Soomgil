@@ -30,9 +30,12 @@ const styles = {
   btn: {
     padding: '12px 16px',
     borderRadius: 10,
-    border: '1px solid #ddd',
-    background: '#fff',
-    cursor: 'pointer'
+    border: '1px solid #ffffffff',
+    background: '#dedae4ff',
+    cursor: 'pointer',
+    fontFamily: "MyCustomFont",
+    fontSize: 20,
+    textShadow: "0.3px 0 black, 0.3px 0 black, 0 0.3px black, 0 -0.3px black",
   }
 }
 

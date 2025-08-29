@@ -246,8 +246,8 @@ export default function CustomLoadingPage() {
   return (
     <div ref={containerRef} style={styles.container}>
     <div style={styles.textWrapper}>
-      <h1 style={styles.title}>나만의 산책로 생성중</h1>
-      <h3 style={styles.subtitle}>다른 사람들이 그린 그림이 떠다니고 있어요!</h3>
+      <h1 style={styles.title}>나만의 산책로 생성중...</h1>
+      <h3 style={styles.subtitle}>다른 사람들이 그린 그림들이 떠다니고 있어요!</h3>
       </div>
 
       {SPRITES.map((s, idx) => (

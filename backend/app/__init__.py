@@ -10,7 +10,7 @@ def create_app(config_name='default'):
     app.config['SECRET_KEY'] = 'dev-secret-key'
     
     # CORS 설정 (프론트엔드와의 통신을 위해)
-    CORS(app, resources={r"/api/*": {"origins": "*"}})
+    CORS(app, resources={r"/*": {"origins": "*"}})
     
     # 블루프린트 등록
     from app.routes import api_bp

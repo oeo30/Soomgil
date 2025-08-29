@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext.jsx";
 import * as L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { FaChevronRight, FaChevronDown } from "react-icons/fa";
+import { getRouteHistory } from "../utils/routeHistory.js";
 
 
 export default function SetupPage() {
@@ -16,12 +17,42 @@ export default function SetupPage() {
   const [showDurationInput, setShowDurationInput] = useState(false);
   const [showMoodInput, setShowMoodInput] = useState(false);
   const [mood, setMood] = useState("");
+  const [personalizedMessages, setPersonalizedMessages] = useState([
+    "🌼 처음 만나는 중랑천 산책길을 느껴보세요!",
+    "🌼 요즘에는 늘봄공원 벚꽃이 예뻐요!",
+    "🌼 SNS에서 사랑받는 청량리 꿈의 숲길 만나보세요!"
+  ]);
 
 
   const mapRef = useRef(null);
   const markerRef = useRef(null);
   const mapDivRef = useRef(null);
   const boundaryLayerRef = useRef(null); // 동대문구 경계 레이어 저장
+
+  // 개인화된 메시지 가져오기
+  const fetchPersonalizedMessages = async () => {
+    try {
+      const userHistory = getRouteHistory();
+      console.log("사용자 산책 기록:", userHistory);
+      
+      const response = await fetch('http://localhost:5001/api/personalization', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ user_history: userHistory })
+      });
+      
+      const result = await response.json();
+      console.log("개인화 API 응답:", result);
+      
+      if (result.success && result.messages) {
+        setPersonalizedMessages(result.messages);
+      }
+    } catch (error) {
+      console.error("개인화 메시지 가져오기 실패:", error);
+    }
+  };
 
 
   // 좌표 → 주소 변환
@@ -106,6 +137,11 @@ export default function SetupPage() {
       console.error("지오코딩 실패:", e);
     }
   };
+
+  // 페이지 로드 시 개인화된 메시지 가져오기
+  useEffect(() => {
+    fetchPersonalizedMessages();
+  }, []);
 
   // 지도 초기화
   useEffect(() => {
@@ -244,33 +280,18 @@ fetch("https://nominatim.openstreetmap.org/search.php?q=동대문구&polygon_geo
     fontFamily: "MyCustomFont",
   }}
 >
-  <p
-    style={{
-      fontSize: 23,
-      margin: "0 0 4px 0",
-      textShadow: "0.2px 0 #000000ff, -0.2px 0 #000000ff, 0 0.2px #000000ff, 0 -0.2px #000000ff",
-    }}
-  >
-    🌼 처음 만나는 중랑천 산책길을 느껴보세요!
-  </p>
-  <p
-    style={{
-      fontSize: 23,
-      margin: "0 0 4px 0",
-      textShadow: "0.2px 0 #000000ff, -0.2px 0 #000000ff, 0 0.2px #000000ff, 0 -0.2px #000000ff",
-    }}
-  >
-    🌼 요즘에는 늘봄공원 벚꽃이 예뻐요!
-  </p>
-  <p
-    style={{
-      fontSize: 23,
-      margin: 0,
-      textShadow: "0.2px 0 #000000ff, -0.2px 0 #000000ff, 0 0.2px #000000ff, 0 -0.2px #000000ff",
-    }}
-  >
-    🌼 SNS에서 사랑받는 청량리 꿈의 숲길 만나보세요!
-  </p>
+  {personalizedMessages.map((message, index) => (
+    <p
+      key={index}
+      style={{
+        fontSize: 23,
+        margin: index === personalizedMessages.length - 1 ? 0 : "0 0 4px 0",
+        textShadow: "0.2px 0 #000000ff, -0.2px 0 #000000ff, 0 0.2px #000000ff, 0 -0.2px #000000ff",
+      }}
+    >
+      {message}
+    </p>
+  ))}
 </div>
 
         {/* 추가 끝 */}

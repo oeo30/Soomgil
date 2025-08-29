@@ -295,6 +295,34 @@ def get_statistics():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@api_bp.route('/personalization', methods=['POST'])
+def get_personalized_messages():
+    """개인화된 메시지 생성"""
+    try:
+        data = request.get_json()
+        user_history = data.get('user_history', [])
+        
+        # 개인화 모듈 import
+        import sys
+        sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'services', 'personalization'))
+        from personalization import get_personalized_messages
+        
+        # 개인화된 메시지 생성
+        result = get_personalized_messages(user_history)
+        
+        return jsonify(result)
+        
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "messages": [
+                "🌼 처음 만나는 중랑천 산책길을 느껴보세요!",
+                "🌼 요즘에는 늘봄공원 벚꽃이 예뻐요!",
+                "🌼 SNS에서 사랑받는 청량리 꿈의 숲길 만나보세요!"
+            ],
+            "error": str(e)
+        }), 500
+
 @api_bp.route('/upload', methods=['POST'])
 def upload_image():
     """이미지 업로드 및 커스텀 경로 생성"""

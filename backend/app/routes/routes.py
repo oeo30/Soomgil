@@ -295,6 +295,32 @@ def get_statistics():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@api_bp.route('/personalization', methods=['POST'])
+def get_personalized_messages():
+    """개인화된 메시지 생성"""
+    try:
+        data = request.get_json()
+        user_history = data.get('user_history', [])
+        
+        # 개인화 모듈 import
+        import sys
+        sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'services', 'personalization'))
+        from personalization import get_personalized_messages
+        
+        # 개인화된 메시지 생성
+        result = get_personalized_messages(user_history)
+        
+        return jsonify(result)
+        
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "messages": [
+                "🌼 동대문구의 숨은 산책로를 찾아보아요!"
+            ],
+            "error": str(e)
+        }), 500
+
 @api_bp.route('/upload', methods=['POST'])
 def upload_image():
     """이미지 업로드 및 커스텀 경로 생성"""
@@ -395,3 +421,129 @@ def upload_image():
     except Exception as e:
         print(f"❌ 업로드 실패: {e}")
         return jsonify({"error": f"업로드 중 오류 발생: {str(e)}"}), 500
+
+@api_bp.route('/find-destination-edge', methods=['POST'])
+def find_destination_edge():
+    """목적지와 일치하는 엣지를 찾고 현재 위치에서 가장 가까운 엣지 선택"""
+    try:
+        data = request.get_json()
+        destination_name = data.get("destination")
+        current_lat = data.get("current_lat")
+        current_lon = data.get("current_lon")
+        
+        if not destination_name or current_lat is None or current_lon is None:
+            return jsonify({"error": "목적지명, 현재 위도, 경도가 필요합니다"}), 400
+        
+        # final_edges.geojson 파일 읽기
+        geojson_path = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'data', '04_final_data', 'final_edges.geojson')
+        
+        if not os.path.exists(geojson_path):
+            return jsonify({"error": "final_edges.geojson 파일을 찾을 수 없습니다"}), 404
+        
+        with open(geojson_path, 'r', encoding='utf-8') as f:
+            geojson_data = json.load(f)
+        
+        # 목적지와 일치하는 엣지들 찾기
+        matching_edges = []
+        
+        for feature in geojson_data.get('features', []):
+            properties = feature.get('properties', {})
+            edge_name = properties.get('name')
+            
+            if edge_name and destination_name in edge_name:
+                # 엣지의 중점 계산
+                geometry = feature.get('geometry', {})
+                if geometry.get('type') == 'LineString':
+                    coordinates = geometry.get('coordinates', [])
+                    if coordinates:
+                        # 중점 계산 (첫 번째와 마지막 좌표의 평균)
+                        start_coord = coordinates[0]
+                        end_coord = coordinates[-1]
+                        mid_lat = (start_coord[1] + end_coord[1]) / 2
+                        mid_lon = (start_coord[0] + end_coord[0]) / 2
+                        
+                        # 현재 위치와의 거리 계산 (간단한 유클리드 거리)
+                        distance = ((current_lat - mid_lat) ** 2 + (current_lon - mid_lon) ** 2) ** 0.5
+                        
+                        matching_edges.append({
+                            'feature': feature,
+                            'distance': distance,
+                            'mid_lat': mid_lat,
+                            'mid_lon': mid_lon
+                        })
+        
+        if not matching_edges:
+            return jsonify({"error": f"'{destination_name}'과 일치하는 엣지를 찾을 수 없습니다"}), 404
+        
+        # 가장 가까운 엣지 선택
+        closest_edge = min(matching_edges, key=lambda x: x['distance'])
+        
+        return jsonify({
+            'success': True,
+            'closest_edge': closest_edge['feature'],
+            'distance': closest_edge['distance'],
+            'mid_lat': closest_edge['mid_lat'],
+            'mid_lon': closest_edge['mid_lon'],
+            'total_matches': len(matching_edges)
+        })
+        
+    except Exception as e:
+        return jsonify({"error": f"엣지 검색 중 오류 발생: {str(e)}"}), 500
+
+@api_bp.route('/generate-personalized-route', methods=['POST'])
+def generate_personalized_route():
+    """개인화된 경로 생성 (현재 위치에서 목적지 엣지까지)"""
+    try:
+        data = request.get_json()
+        start_lat = data.get("start_lat")
+        start_lon = data.get("start_lon")
+        destination_lat = data.get("destination_lat")
+        destination_lon = data.get("destination_lon")
+        destination_name = data.get("destination_name")
+        
+        if not all([start_lat, start_lon, destination_lat, destination_lon, destination_name]):
+            return jsonify({"error": "시작점, 목적지 좌표, 목적지명이 모두 필요합니다"}), 400
+        
+        # 현재 작업 디렉토리를 프로젝트 루트로 변경
+        original_cwd = os.getcwd()
+        project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+        os.chdir(project_root)
+        
+        # personalized_route_generator.py 실행
+        subprocess.run([
+            'python', 
+            'backend/app/services/personalization/personalized_route_generator.py'
+        ], check=True, cwd=project_root, env=dict(os.environ, 
+            START_LAT=str(start_lat),
+            START_LON=str(start_lon),
+            DEST_LAT=str(destination_lat),
+            DEST_LON=str(destination_lon),
+            DEST_NAME=destination_name
+        ))
+        
+        # 원래 디렉토리로 복원
+        os.chdir(original_cwd)
+        
+        # 결과 파일 경로
+        geojson_path = os.path.join(project_root, "backend/app/services/personalization/personalized_route.geojson")
+        description_path = os.path.join(project_root, "backend/app/services/personalization/personalized_description.json")
+        
+        if os.path.exists(geojson_path):
+            with open(geojson_path, 'r', encoding='utf-8') as f:
+                geojson_data = json.load(f)
+            
+            description_data = {}
+            if os.path.exists(description_path):
+                with open(description_path, 'r', encoding='utf-8') as f:
+                    description_data = json.load(f)
+            
+            return jsonify({
+                'success': True,
+                'geojson': geojson_data,
+                'description': description_data.get('description', f'{destination_name}까지의 개인화된 경로입니다.')
+            })
+        else:
+            return jsonify({"error": "개인화된 경로 생성에 실패했습니다"}), 500
+            
+    except Exception as e:
+        return jsonify({"error": f"개인화된 경로 생성 중 오류 발생: {str(e)}"}), 500

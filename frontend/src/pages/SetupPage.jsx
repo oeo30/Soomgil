@@ -230,6 +230,51 @@ fetch("https://nominatim.openstreetmap.org/search.php?q=동대문구&polygon_geo
 
       {/* 버튼들 */}
       <div style={styles.buttons}>
+
+        {/* 추가: 안내 문구 3줄 */}
+        <div
+  style={{
+    marginTop: 0,
+    marginBottom: 24,   // 아래 버튼과의 간격
+    textAlign: "center",
+    width: "100%",
+    display: "flex",
+    flexDirection: "column",
+    gap: 4,
+    fontFamily: "MyCustomFont",
+  }}
+>
+  <p
+    style={{
+      fontSize: 23,
+      margin: "0 0 4px 0",
+      textShadow: "0.2px 0 #000000ff, -0.2px 0 #000000ff, 0 0.2px #000000ff, 0 -0.2px #000000ff",
+    }}
+  >
+    🌼 처음 만나는 중랑천 산책길을 느껴보세요!
+  </p>
+  <p
+    style={{
+      fontSize: 23,
+      margin: "0 0 4px 0",
+      textShadow: "0.2px 0 #000000ff, -0.2px 0 #000000ff, 0 0.2px #000000ff, 0 -0.2px #000000ff",
+    }}
+  >
+    🌼 요즘에는 늘봄공원 벚꽃이 예뻐요!
+  </p>
+  <p
+    style={{
+      fontSize: 23,
+      margin: 0,
+      textShadow: "0.2px 0 #000000ff, -0.2px 0 #000000ff, 0 0.2px #000000ff, 0 -0.2px #000000ff",
+    }}
+  >
+    🌼 SNS에서 사랑받는 청량리 꿈의 숲길 만나보세요!
+  </p>
+</div>
+
+        {/* 추가 끝 */}
+
        {/* 시작 위치 선택 */}
 <button style={styles.btn} onClick={() => setShowMap((prev) => !prev)}>
   {showMap ? <FaChevronDown size={14} style={{ marginRight: 6 }} /> 
@@ -403,7 +448,7 @@ const styles = {
     display:"flex",
     flexDirection:"column",
     alignItems:"center",
-    marginBottom: 20,
+    marginBottom: 20, // 숨길이랑 소개 텍스트 사이 간격
   },
   subtitle: {
     fontSize: 30,

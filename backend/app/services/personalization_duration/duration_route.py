@@ -331,14 +331,14 @@ def generate_duration_based_route(start_lat: float, start_lon: float, user_prefe
             # 경로 설명 생성
             if optimal_path:
                 length_km = round(path_length/1000, 1)
-                time_min = round(path_length/1000/3.5*60, 0)
+                time_min = round(path_length/1000/3.5*60)  # 정수로 반올림
                 description = f"🌱 {destination_name}까지의 {recommendation['distance_range']['name']}입니다. "
                 description += f"총 거리는 {length_km}km로, "
                 description += f"약 {time_min}분 정도 소요됩니다."
             else:
                 description = f"🌱 {destination_name}까지의 {recommendation['distance_range']['name']}입니다. "
                 description += f"총 거리는 {round(recommended_place['distance'], 1)}km로, "
-                description += f"약 {int(recommended_place['distance'] * 20)}분 정도 소요됩니다."
+                description += f"약 {round(recommended_place['distance'] * 20)}분 정도 소요됩니다."
             
             return {
                 'success': True,

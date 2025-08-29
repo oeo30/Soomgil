@@ -10,6 +10,7 @@ export default function RecommendationPage2() {
 
   const [routeData, setRouteData] = useState(null);
   const [error, setError] = useState(null);
+  const [actualDestination, setActualDestination] = useState(recommendedPlace);
 
   // 시간대별 경로 생성
   useEffect(() => {
@@ -34,6 +35,11 @@ export default function RecommendationPage2() {
 
         if (result.success) {
           console.log("✅ 시간대별 경로 생성 성공:", result);
+          
+          // 실제 추천된 장소명 설정
+          const actualPlace = result.recommended_place?.name || recommendedPlace;
+          setActualDestination(actualPlace);
+          
           setRouteData({
             geojson: result.geojson,
             description: result.description
@@ -87,7 +93,7 @@ export default function RecommendationPage2() {
         <div style={{ marginTop: 20 }}>
           <h2 style={styles.subtitle}>🎯 시간대별 개인화 추천</h2>
           <p style={styles.text}>
-            추천 장소: {recommendedPlace}
+            추천 장소: {actualDestination}
           </p>
         </div>
 
@@ -97,14 +103,14 @@ export default function RecommendationPage2() {
           <div style={styles.mapContainer}>
             <div style={styles.mapHeader}>
               <p style={styles.mapTitle}>
-                {recommendedPlace}까지의 시간대별 최적 경로
+                {actualDestination}까지의 시간대별 최적 경로
               </p>
             </div>
             <div style={styles.mapWrapper}>
               <RouteMap 
                 geojsonData={routeData?.geojson} 
                 startLocation={currentLocation}
-                destination={recommendedPlace}
+                destination={actualDestination}
               />
             </div>
           </div>

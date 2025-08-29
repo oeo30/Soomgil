@@ -49,6 +49,8 @@ def analyze_user_preference(user_history):
     sub_type_counts = {"어린이공원": 0, "일반공원": 0}
     
     for place in visited_places:
+        matched = False
+        
         # 공원 하위분류 확인
         if "공원" in place_types:
             park_data = place_types["공원"]
@@ -57,17 +59,24 @@ def analyze_user_preference(user_history):
                     if place in sub_places:
                         type_counts["공원"] += 1
                         sub_type_counts[sub_type] += 1
+                        matched = True
                         break
+                if matched:
+                    continue
             else:  # 기존 방식 (하위분류 없는 경우)
                 if place in park_data:
                     type_counts["공원"] += 1
-                    break
-        else:
-            # 다른 유형들 확인
-            for place_type, places in place_types.items():
-                if place_type != "공원" and place in places:
-                    type_counts[place_type] += 1
-                    break
+                    matched = True
+                    continue
+        
+        # 다른 유형들 확인
+        for place_type, places in place_types.items():
+            if place_type != "공원" and place in places:
+                type_counts[place_type] += 1
+                matched = True
+                break
+        
+
     
     # 가장 많이 방문한 유형 찾기
     if sum(type_counts.values()) == 0:
@@ -94,9 +103,7 @@ def generate_personalized_message(user_preference):
     if not user_preference:
         # 기록이 없는 경우 기본 멘트들
         return [
-            "🌼 처음 만나는 중랑천 산책길을 느껴보세요!",
-            "🌼 요즘에는 늘봄공원 벚꽃이 예뻐요!",
-            "🌼 SNS에서 사랑받는 청량리 꿈의 숲길 만나보세요!"
+            "🌼 동대문구의 숨은 산책로를 찾아보아요!"
         ]
     
     favorite_type = user_preference["favorite_type"]
@@ -169,11 +176,9 @@ def generate_personalized_message(user_preference):
     else:
         message = f"🌼 {favorite_type}을 좋아하시네요? 오늘은 {recommended_place}에서 새로운 산책을 시작해보세요!"
     
-    # 기본 멘트들과 함께 반환
+    # 개인화된 메시지만 반환
     messages = [
-        message,
-        "🌼 요즘에는 늘봄공원 벚꽃이 예뻐요!",
-        "🌼 SNS에서 사랑받는 청량리 꿈의 숲길 만나보세요!"
+        message
     ]
     
     return messages
@@ -188,10 +193,15 @@ def get_personalized_messages(user_history):
         # 개인화된 멘트 생성
         messages = generate_personalized_message(user_preference)
         
+        # 가장 최근 방문한 장소의 좌표 가져오기
+        from place_coordinates import get_latest_visited_coordinates
+        latest_coordinates = get_latest_visited_coordinates(user_history)
+        
         return {
             "success": True,
             "messages": messages,
-            "user_preference": user_preference
+            "user_preference": user_preference,
+            "latest_coordinates": latest_coordinates
         }
         
     except Exception as e:

@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState, useMemo } from "react";
-import { getRouteHistory } from "../utils/routeHistory.js";
+import { getRouteHistory, clearRouteHistory } from "../utils/routeHistory.js";
 
 export default function MyPage() {
   const nav = useNavigate();
@@ -10,6 +10,7 @@ export default function MyPage() {
   const badge = "🥇 초보 산책러";
 
 const [routes, setRoutes] = useState([]);
+const [isHovered, setIsHovered] = useState(false);
 
   useEffect(() => {
     setRoutes(getRouteHistory());   // ✅ sessionStorage에서 불러오기
@@ -28,6 +29,15 @@ const [routes, setRoutes] = useState([]);
     if (h > 0 && m > 0) return `${h}시간 ${m}분`;
     if (h > 0) return `${h}시간`;
     return `${m}분`;
+  };
+
+  // 전체 경로 삭제 함수
+  const handleClearAllRoutes = () => {
+    if (window.confirm("모든 산책 기록을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.")) {
+      clearRouteHistory();
+      setRoutes([]); // 상태 업데이트
+      alert("모든 산책 기록이 삭제되었습니다.");
+    }
   };
 
   // 1시간 = 1스탬프
@@ -91,7 +101,22 @@ const [routes, setRoutes] = useState([]);
 
       {/* 산책 기록 */}
       <div style={{ marginTop: 40 }}>
-        <h3 style={styles.subtitle}>🌳 나의 산책 기록</h3>
+        <div style={styles.recordHeaderSection}>
+          <h3 style={styles.subtitle}>🌳 나의 산책 기록</h3>
+          {routes.length > 0 && (
+            <button 
+              onClick={handleClearAllRoutes}
+              style={{
+                ...styles.clearAllButton,
+                background: isHovered ? "#ff5252" : "#ff6b6b"
+              }}
+              onMouseEnter={() => setIsHovered(true)}
+              onMouseLeave={() => setIsHovered(false)}
+            >
+              🗑️ 전체 삭제
+            </button>
+          )}
+        </div>
         
 
 
@@ -229,6 +254,24 @@ const styles = {
     background: "#fff",
   },
   subtitle: { fontSize: 35, marginTop: 0, marginBottom: 0, fontFamily: "MyCustomFont",textShadow: "0.5px 0 black, -0.5px 0 black, 0 0.5px black, 0 -0.5px black", },
+  recordHeaderSection: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  clearAllButton: {
+    background: "#ff6b6b",
+    color: "white",
+    border: "none",
+    borderRadius: "8px",
+    padding: "8px 16px",
+    fontSize: "16px",
+    cursor: "pointer",
+    fontFamily: "MyCustomFont",
+    fontWeight: "bold",
+    transition: "background-color 0.2s",
+  },
   recordHeader: {
     fontSize: 25,
     display: "grid",

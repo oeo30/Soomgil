@@ -18,9 +18,7 @@ export default function SetupPage() {
   const [showMoodInput, setShowMoodInput] = useState(false);
   const [mood, setMood] = useState("");
   const [personalizedMessages, setPersonalizedMessages] = useState([
-    "🌼 처음 만나는 중랑천 산책길을 느껴보세요!",
-    "🌼 요즘에는 늘봄공원 벚꽃이 예뻐요!",
-    "🌼 SNS에서 사랑받는 청량리 꿈의 숲길 만나보세요!"
+    "🌼 동대문구의 숨은 산책로를 찾아보아요!"
   ]);
 
 
@@ -35,6 +33,12 @@ export default function SetupPage() {
       const userHistory = getRouteHistory();
       console.log("사용자 산책 기록:", userHistory);
       
+      // routeHistory가 없으면 기본 메시지만 표시
+      if (!userHistory || userHistory.length === 0) {
+        setPersonalizedMessages(["🌼 동대문구의 숨은 산책로를 찾아보아요!"]);
+        return;
+      }
+      
       const response = await fetch('http://localhost:5001/api/personalization', {
         method: 'POST',
         headers: {
@@ -48,9 +52,20 @@ export default function SetupPage() {
       
       if (result.success && result.messages) {
         setPersonalizedMessages(result.messages);
+        
+        // 가장 최근 방문한 장소의 좌표가 있으면 시작 위치로 설정
+        if (result.latest_coordinates) {
+          console.log("최근 방문 위치로 시작점 설정:", result.latest_coordinates);
+          setStartLocation(result.latest_coordinates);
+          
+          // 주소도 함께 업데이트
+          await fetchAddress(result.latest_coordinates.lat, result.latest_coordinates.lng);
+        }
       }
     } catch (error) {
       console.error("개인화 메시지 가져오기 실패:", error);
+      // 에러 발생 시에도 기본 메시지 표시
+      setPersonalizedMessages(["🌼 동대문구의 숨은 산책로를 찾아보아요!"]);
     }
   };
 
@@ -280,18 +295,47 @@ fetch("https://nominatim.openstreetmap.org/search.php?q=동대문구&polygon_geo
     fontFamily: "MyCustomFont",
   }}
 >
-  {personalizedMessages.map((message, index) => (
-    <p
-      key={index}
-      style={{
-        fontSize: 23,
-        margin: index === personalizedMessages.length - 1 ? 0 : "0 0 4px 0",
-        textShadow: "0.2px 0 #000000ff, -0.2px 0 #000000ff, 0 0.2px #000000ff, 0 -0.2px #000000ff",
-      }}
-    >
-      {message}
-    </p>
-  ))}
+  {personalizedMessages.map((message, index) => {
+    // 첫 번째 메시지(개인화된 메시지)만 클릭 가능하게 만들기
+    const isClickable = index === 0 && message.includes("오늘은") && message.includes("에서 새로운 산책을 시작해보세요");
+    
+    // 추천된 장소 추출
+    const extractRecommendedPlace = (msg) => {
+      const match = msg.match(/오늘은 (.+?)에서 새로운 산책을 시작해보세요/);
+      return match ? match[1] : null;
+    };
+    
+    const recommendedPlace = extractRecommendedPlace(message);
+    
+    return (
+      <p
+        key={index}
+        style={{
+          fontSize: 23,
+          margin: index === personalizedMessages.length - 1 ? 0 : "0 0 4px 0",
+          textShadow: "0.2px 0 #000000ff, -0.2px 0 #000000ff, 0 0.2px #000000ff, 0 -0.2px #000000ff",
+          cursor: isClickable ? "pointer" : "default",
+          textDecoration: isClickable ? "underline" : "none",
+          textDecorationThickness: isClickable ? "0.5px" : "auto",
+          color: isClickable ? "#3a893e" : "inherit",
+        }}
+        onClick={() => {
+          if (isClickable && recommendedPlace) {
+            // 개인화 정보와 함께 추천 페이지로 이동
+            nav("/recommendation1", {
+              state: {
+                recommendedPlace,
+                userPreference: null, // TODO: 실제 사용자 취향 정보 전달
+                currentLocation: startLocation || { lat: 37.5839, lng: 127.0559 }
+              }
+            });
+          }
+        }}
+      >
+        {message}
+      </p>
+    );
+  })}
 </div>
 
         {/* 추가 끝 */}

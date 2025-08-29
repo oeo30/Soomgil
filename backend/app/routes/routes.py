@@ -90,6 +90,33 @@ def generate_music():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@api_bp.route('/music/<mood>', methods=['GET'])
+def get_music_by_mood(mood):
+    """무드에 따른 음악 파일 제공"""
+    try:
+        # 무드에 따른 음악 파일 매핑
+        mood_mapping = {
+            '활기찬': '활기찬.wav',
+            '잔잔한': '잔잔한.wav',
+            '상쾌한': '경쾌한.wav',
+            '몽환적': '몽환적.wav'
+        }
+        
+        filename = mood_mapping.get(mood)
+        if not filename:
+            return jsonify({"error": "지원하지 않는 무드입니다"}), 400
+        
+        # 현재 파일의 절대 경로를 기준으로 상대 경로 계산
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        music_path = os.path.join(current_dir, "..", "services", "musicgen", "results", filename)
+        if os.path.exists(music_path):
+            return send_file(music_path, mimetype="audio/wav")
+        else:
+            return jsonify({"error": "음악 파일을 찾을 수 없습니다"}), 404
+            
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @api_bp.route('/routes/recommend', methods=['POST'])
 def recommend_route():
     """경로 추천 (새로운 통합 API)"""

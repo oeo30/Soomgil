@@ -75,8 +75,8 @@ export default function ResultPage() {
         {/* 음악 추천 */}
         <div style={{ marginTop: 20 }}>
           <h2 style={styles.subtitle}>🎵 추천 음악</h2>
-          <div style={{ marginBottom: 40 }}>
-            <AudioPlayer src="/sample.mp3" />
+          <div style={{ marginTop: 20, marginBottom: 40 }}>
+            <AudioPlayer mood={mood} />
           </div>
         </div>
       </div>

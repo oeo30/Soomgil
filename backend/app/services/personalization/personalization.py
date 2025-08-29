@@ -98,7 +98,7 @@ def analyze_user_preference(user_history):
     }
 
 # 개인화된 멘트 생성
-def generate_personalized_message(user_preference):
+def generate_personalized_message(user_preference, user_history):
     """사용자 취향에 따른 개인화된 멘트 생성"""
     if not user_preference:
         # 기록이 없는 경우 기본 멘트들
@@ -176,10 +176,23 @@ def generate_personalized_message(user_preference):
     else:
         message = f"🌼 {favorite_type}을 좋아하시네요? 오늘은 {recommended_place}에서 새로운 산책을 시작해보세요!"
     
-    # 개인화된 메시지만 반환
-    messages = [
-        message
-    ]
+    # 개인화된 메시지 생성
+    messages = [message]
+    
+    # 시간대별 개인화 메시지 추가
+    try:
+        import sys
+        duration_path = os.path.join(os.path.dirname(__file__), '..', 'personalization_duration')
+        sys.path.append(duration_path)
+        from duration_analysis import get_duration_personalized_messages
+        
+        duration_result = get_duration_personalized_messages(user_history)
+        if duration_result.get('success') and duration_result.get('messages'):
+            messages.extend(duration_result['messages'])
+    except Exception as e:
+        print(f"시간대별 개인화 메시지 추가 실패: {e}")
+        print(f"경로: {duration_path}")
+        print(f"에러 상세: {str(e)}")
     
     return messages
 
@@ -187,25 +200,39 @@ def generate_personalized_message(user_preference):
 def get_personalized_messages(user_history):
     """사용자 기록을 받아서 개인화된 멘트 반환"""
     try:
+        print(f"🔍 개인화 메시지 생성 시작: {len(user_history)}개 기록")
+        
         # 사용자 취향 분석
         user_preference = analyze_user_preference(user_history)
+        print(f"✅ 취향 분석 완료: {user_preference}")
         
         # 개인화된 멘트 생성
-        messages = generate_personalized_message(user_preference)
+        messages = generate_personalized_message(user_preference, user_history)
+        print(f"✅ 메시지 생성 완료: {len(messages)}개 메시지")
         
         # 가장 최근 방문한 장소의 좌표 가져오기
-        from place_coordinates import get_latest_visited_coordinates
-        latest_coordinates = get_latest_visited_coordinates(user_history)
+        try:
+            from place_coordinates import get_latest_visited_coordinates
+            latest_coordinates = get_latest_visited_coordinates(user_history)
+            print(f"✅ 좌표 가져오기 완료: {latest_coordinates}")
+        except Exception as coord_error:
+            print(f"⚠️ 좌표 가져오기 실패: {coord_error}")
+            latest_coordinates = None
         
-        return {
+        result = {
             "success": True,
             "messages": messages,
             "user_preference": user_preference,
             "latest_coordinates": latest_coordinates
         }
         
+        print(f"🎉 최종 결과: {result}")
+        return result
+        
     except Exception as e:
-        print(f"개인화 메시지 생성 중 오류: {e}")
+        print(f"💥 개인화 메시지 생성 중 오류: {e}")
+        import traceback
+        traceback.print_exc()
         return {
             "success": False,
             "messages": [
@@ -221,28 +248,28 @@ if __name__ == "__main__":
     # 다양한 테스트 데이터
     test_cases = [
         {
-            "name": "산을 좋아하는 사용자",
+            "name": "산을 좋아하는 사용자 (짧은 산책 선호)",
             "history": [
-                {"title": "🟢 배봉산", "summary": "배봉산 산책"},
-                {"title": "🟢 천장산", "summary": "천장산 산책"},
-                {"title": "🟢 배봉산", "summary": "배봉산 산책"}
+                {"title": "🟢 배봉산", "summary": "배봉산 산책", "durationMin": 20},
+                {"title": "🟢 천장산", "summary": "천장산 산책", "durationMin": 25},
+                {"title": "🟢 배봉산", "summary": "배봉산 산책", "durationMin": 15}
             ]
         },
         {
-            "name": "공원을 좋아하는 사용자", 
+            "name": "공원을 좋아하는 사용자 (긴 산책 선호)", 
             "history": [
-                {"title": "🟠 어린이놀이터", "summary": "어린이놀이터 산책"},
-                {"title": "🟠 장안근린공원", "summary": "장안근린공원 산책"},
-                {"title": "🟠 늘봄어린이공원", "summary": "늘봄어린이공원 산책"},
-                {"title": "🟠 장미공원", "summary": "장미공원 산책"}
+                {"title": "🟠 어린이놀이터", "summary": "어린이놀이터 산책", "durationMin": 100},
+                {"title": "🟠 장안근린공원", "summary": "장안근린공원 산책", "durationMin": 110},
+                {"title": "🟠 늘봄어린이공원", "summary": "늘봄어린이공원 산책", "durationMin": 95},
+                {"title": "🟠 장미공원", "summary": "장미공원 산책", "durationMin": 105}
             ]
         },
         {
-            "name": "하천을 좋아하는 사용자",
+            "name": "하천을 좋아하는 사용자 (중간 산책 선호)",
             "history": [
-                {"title": "🔵 중랑천", "summary": "중랑천 산책"},
-                {"title": "🔵 정릉천", "summary": "정릉천 산책"},
-                {"title": "🔵 청계천", "summary": "청계천 산책"}
+                {"title": "🔵 중랑천", "summary": "중랑천 산책", "durationMin": 60},
+                {"title": "🔵 정릉천", "summary": "정릉천 산책", "durationMin": 75},
+                {"title": "🔵 청계천", "summary": "청계천 산책", "durationMin": 45}
             ]
         },
         {
@@ -261,5 +288,8 @@ if __name__ == "__main__":
             print(f"하위분류 횟수: {result['user_preference'].get('sub_type_counts', {})}")
         else:
             print("취향: 기록 없음")
-        print(f"첫 번째 메시지: {result['messages'][0]}")
+        
+        print(f"총 메시지 개수: {len(result['messages'])}")
+        for i, msg in enumerate(result['messages'], 1):
+            print(f"메시지 {i}: {msg}")
         print("-" * 50)

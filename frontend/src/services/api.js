@@ -106,3 +106,13 @@ export async function healthCheck() {
     method: 'GET'
   });
 }
+
+// 개인화 메시지 API
+export async function getPersonalizedMessages(userHistory) {
+  return apiCall('/personalized-messages', {
+    method: 'POST',
+    body: JSON.stringify({
+      user_history: userHistory
+    })
+  });
+}

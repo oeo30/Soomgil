@@ -6,6 +6,7 @@ import * as L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { FaChevronRight, FaChevronDown } from "react-icons/fa";
 import { getRouteHistory } from "../utils/routeHistory.js";
+import { getPersonalizedMessages } from "../services/api.js";
 
 
 export default function SetupPage() {
@@ -31,39 +32,38 @@ export default function SetupPage() {
   const fetchPersonalizedMessages = async () => {
     try {
       const userHistory = getRouteHistory();
-      console.log("사용자 산책 기록:", userHistory);
+      console.log("🔍 사용자 산책 기록:", userHistory);
+      console.log("🔍 기록 개수:", userHistory ? userHistory.length : 0);
       
       // routeHistory가 없으면 기본 메시지만 표시
       if (!userHistory || userHistory.length === 0) {
+        console.log("⚠️ 기록이 없어서 기본 메시지 표시");
         setPersonalizedMessages(["🌼 동대문구의 숨은 산책로를 찾아보아요!"]);
         return;
       }
       
-      const response = await fetch('http://localhost:5001/api/personalization', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ user_history: userHistory })
-      });
-      
-      const result = await response.json();
-      console.log("개인화 API 응답:", result);
+      console.log("🚀 API 호출 시작...");
+      const result = await getPersonalizedMessages(userHistory);
+      console.log("✅ 개인화 API 응답:", result);
       
       if (result.success && result.messages) {
+        console.log("🎉 개인화 메시지 설정:", result.messages);
         setPersonalizedMessages(result.messages);
         
         // 가장 최근 방문한 장소의 좌표가 있으면 시작 위치로 설정
         if (result.latest_coordinates) {
-          console.log("최근 방문 위치로 시작점 설정:", result.latest_coordinates);
+          console.log("📍 최근 방문 위치로 시작점 설정:", result.latest_coordinates);
           setStartLocation(result.latest_coordinates);
           
           // 주소도 함께 업데이트
           await fetchAddress(result.latest_coordinates.lat, result.latest_coordinates.lng);
         }
+      } else {
+        console.log("❌ API 응답 실패 또는 메시지 없음");
+        setPersonalizedMessages(["🌼 동대문구의 숨은 산책로를 찾아보아요!"]);
       }
     } catch (error) {
-      console.error("개인화 메시지 가져오기 실패:", error);
+      console.error("💥 개인화 메시지 가져오기 실패:", error);
       // 에러 발생 시에도 기본 메시지 표시
       setPersonalizedMessages(["🌼 동대문구의 숨은 산책로를 찾아보아요!"]);
     }

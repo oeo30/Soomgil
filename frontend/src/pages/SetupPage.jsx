@@ -296,16 +296,31 @@ fetch("https://nominatim.openstreetmap.org/search.php?q=동대문구&polygon_geo
   }}
 >
   {personalizedMessages.map((message, index) => {
-    // 첫 번째 메시지(개인화된 메시지)만 클릭 가능하게 만들기
-    const isClickable = index === 0 && message.includes("오늘은") && message.includes("에서 새로운 산책을 시작해보세요");
+    // 첫 번째 메시지(장소 기반)와 두 번째 메시지(시간대 기반) 클릭 가능하게 만들기
+    const isFirstMessageClickable = index === 0 && message.includes("오늘은") && message.includes("에서 새로운 산책을 시작해보세요");
+    const isSecondMessageClickable = index === 1 && (message.includes("긴 코스") || message.includes("짧은 코스") || message.includes("새로운"));
     
-    // 추천된 장소 추출
+    const isClickable = isFirstMessageClickable || isSecondMessageClickable;
+    
+    // 추천된 장소 추출 (첫 번째 메시지용)
     const extractRecommendedPlace = (msg) => {
       const match = msg.match(/오늘은 (.+?)에서 새로운 산책을 시작해보세요/);
       return match ? match[1] : null;
     };
     
-    const recommendedPlace = extractRecommendedPlace(message);
+    // 시간대별 추천 장소 (두 번째 메시지용)
+    const getDurationBasedPlace = () => {
+      // 사용자 취향에 따른 추천 장소
+      if (message.includes("긴 코스")) {
+        return "한강공원"; // 긴 코스 추천
+      } else if (message.includes("짧은 코스")) {
+        return "어린이놀이터"; // 짧은 코스 추천
+      } else {
+        return "중랑천"; // 변주 코스 추천
+      }
+    };
+    
+    const recommendedPlace = isFirstMessageClickable ? extractRecommendedPlace(message) : getDurationBasedPlace();
     
     return (
       <p
@@ -321,8 +336,10 @@ fetch("https://nominatim.openstreetmap.org/search.php?q=동대문구&polygon_geo
         }}
         onClick={() => {
           if (isClickable && recommendedPlace) {
-            // 개인화 정보와 함께 추천 페이지로 이동
-            nav("/recommendation1", {
+            // 첫 번째 메시지는 RecommendationPage1, 두 번째 메시지는 RecommendationPage2로 이동
+            const targetPage = isFirstMessageClickable ? "/recommendation1" : "/recommendation2";
+            
+            nav(targetPage, {
               state: {
                 recommendedPlace,
                 userPreference: null, // TODO: 실제 사용자 취향 정보 전달

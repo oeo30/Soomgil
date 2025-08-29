@@ -9,6 +9,7 @@ import CustomWalkPage from "./pages/CustomWalkPage";
 import CustomLoadingPage from "./pages/CustomLoadingPage";
 import CustomResultPage from "./pages/CustomResultPage";
 import RecommendationPage1 from "./pages/RecommendationPage1.jsx";
+import RecommendationPage2 from "./pages/RecommendationPage2.jsx";
 
 
 
@@ -25,6 +26,7 @@ export default function App() {
       <Route path="/custom-loading" element={<CustomLoadingPage />} />
       <Route path="/custom-result" element={<CustomResultPage />} />
       <Route path="/recommendation1" element={<RecommendationPage1 />} />
+      <Route path="/recommendation2" element={<RecommendationPage2 />} />
       </Routes>
   );
 }

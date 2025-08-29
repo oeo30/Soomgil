@@ -6,6 +6,7 @@ import * as L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { FaChevronRight, FaChevronDown } from "react-icons/fa";
 import { getRouteHistory } from "../utils/routeHistory.js";
+import { getPersonalizedMessages } from "../services/api.js";
 
 
 export default function SetupPage() {
@@ -27,43 +28,66 @@ export default function SetupPage() {
   const mapDivRef = useRef(null);
   const boundaryLayerRef = useRef(null); // 동대문구 경계 레이어 저장
 
+  // 시간대별 선호도 분석 함수
+  const getDurationPreference = () => {
+    const userHistory = getRouteHistory();
+    if (!userHistory || userHistory.length === 0) {
+      return 'medium'; // 기본값
+    }
+
+    // 최근 5개 기록의 평균 산책 시간 계산
+    const recentHistory = userHistory.slice(0, 5);
+    const totalDuration = recentHistory.reduce((sum, record) => {
+      return sum + (record.durationMin || 30); // 기본값 30분
+    }, 0);
+    const avgDuration = totalDuration / recentHistory.length;
+
+    // 선호도 분류
+    if (avgDuration <= 30) {
+      return 'short';
+    } else if (avgDuration <= 90) {
+      return 'medium';
+    } else {
+      return 'long';
+    }
+  };
+
   // 개인화된 메시지 가져오기
   const fetchPersonalizedMessages = async () => {
     try {
       const userHistory = getRouteHistory();
-      console.log("사용자 산책 기록:", userHistory);
+      console.log("🔍 사용자 산책 기록:", userHistory);
+      console.log("🔍 기록 개수:", userHistory ? userHistory.length : 0);
       
       // routeHistory가 없으면 기본 메시지만 표시
       if (!userHistory || userHistory.length === 0) {
+        console.log("⚠️ 기록이 없어서 기본 메시지 표시");
         setPersonalizedMessages(["🌼 동대문구의 숨은 산책로를 찾아보아요!"]);
         return;
       }
       
-      const response = await fetch('http://localhost:5001/api/personalization', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ user_history: userHistory })
-      });
-      
-      const result = await response.json();
-      console.log("개인화 API 응답:", result);
+      console.log("🚀 API 호출 시작...");
+      const result = await getPersonalizedMessages(userHistory);
+      console.log("✅ 개인화 API 응답:", result);
       
       if (result.success && result.messages) {
+        console.log("🎉 개인화 메시지 설정:", result.messages);
         setPersonalizedMessages(result.messages);
         
         // 가장 최근 방문한 장소의 좌표가 있으면 시작 위치로 설정
         if (result.latest_coordinates) {
-          console.log("최근 방문 위치로 시작점 설정:", result.latest_coordinates);
+          console.log("📍 최근 방문 위치로 시작점 설정:", result.latest_coordinates);
           setStartLocation(result.latest_coordinates);
           
           // 주소도 함께 업데이트
           await fetchAddress(result.latest_coordinates.lat, result.latest_coordinates.lng);
         }
+      } else {
+        console.log("❌ API 응답 실패 또는 메시지 없음");
+        setPersonalizedMessages(["🌼 동대문구의 숨은 산책로를 찾아보아요!"]);
       }
     } catch (error) {
-      console.error("개인화 메시지 가져오기 실패:", error);
+      console.error("💥 개인화 메시지 가져오기 실패:", error);
       // 에러 발생 시에도 기본 메시지 표시
       setPersonalizedMessages(["🌼 동대문구의 숨은 산책로를 찾아보아요!"]);
     }
@@ -296,16 +320,31 @@ fetch("https://nominatim.openstreetmap.org/search.php?q=동대문구&polygon_geo
   }}
 >
   {personalizedMessages.map((message, index) => {
-    // 첫 번째 메시지(개인화된 메시지)만 클릭 가능하게 만들기
-    const isClickable = index === 0 && message.includes("오늘은") && message.includes("에서 새로운 산책을 시작해보세요");
+    // 첫 번째 메시지(장소 기반)와 두 번째 메시지(시간대 기반) 클릭 가능하게 만들기
+    const isFirstMessageClickable = index === 0 && message.includes("오늘은") && message.includes("에서 새로운 산책을 시작해보세요");
+    const isSecondMessageClickable = index === 1 && (message.includes("긴 코스") || message.includes("짧은 코스") || message.includes("새로운"));
     
-    // 추천된 장소 추출
+    const isClickable = isFirstMessageClickable || isSecondMessageClickable;
+    
+    // 추천된 장소 추출 (첫 번째 메시지용)
     const extractRecommendedPlace = (msg) => {
       const match = msg.match(/오늘은 (.+?)에서 새로운 산책을 시작해보세요/);
       return match ? match[1] : null;
     };
     
-    const recommendedPlace = extractRecommendedPlace(message);
+    // 시간대별 추천 장소 (두 번째 메시지용)
+    const getDurationBasedPlace = () => {
+      // 사용자 취향에 따른 추천 장소
+      if (message.includes("긴 코스")) {
+        return "한강공원"; // 긴 코스 추천
+      } else if (message.includes("짧은 코스")) {
+        return "어린이놀이터"; // 짧은 코스 추천
+      } else {
+        return "중랑천"; // 변주 코스 추천
+      }
+    };
+    
+    const recommendedPlace = isFirstMessageClickable ? extractRecommendedPlace(message) : getDurationBasedPlace();
     
     return (
       <p
@@ -321,11 +360,13 @@ fetch("https://nominatim.openstreetmap.org/search.php?q=동대문구&polygon_geo
         }}
         onClick={() => {
           if (isClickable && recommendedPlace) {
-            // 개인화 정보와 함께 추천 페이지로 이동
-            nav("/recommendation1", {
+            // 첫 번째 메시지는 RecommendationPage1, 두 번째 메시지는 RecommendationPage2로 이동
+            const targetPage = isFirstMessageClickable ? "/recommendation1" : "/recommendation2";
+            
+            nav(targetPage, {
               state: {
                 recommendedPlace,
-                userPreference: null, // TODO: 실제 사용자 취향 정보 전달
+                userPreference: getDurationPreference(), // 시간대별 선호도 분석
                 currentLocation: startLocation || { lat: 37.5839, lng: 127.0559 }
               }
             });

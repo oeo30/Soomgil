@@ -106,3 +106,27 @@ export async function healthCheck() {
     method: 'GET'
   });
 }
+
+// 개인화 메시지 API
+export async function getPersonalizedMessages(userHistory) {
+  return apiCall('/personalized-messages', {
+    method: 'POST',
+    body: JSON.stringify({
+      user_history: userHistory
+    })
+  });
+}
+
+// 시간대별 경로 추천 API
+export async function generateDurationRoute(startLat, startLon, userPreference) {
+  console.log('🚀 시간대별 경로 추천 API 호출:', { startLat, startLon, userPreference });
+  
+  return apiCall('/duration-route', {
+    method: 'POST',
+    body: JSON.stringify({
+      start_lat: startLat,
+      start_lon: startLon,
+      user_preference: userPreference
+    })
+  });
+}

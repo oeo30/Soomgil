@@ -1,57 +1,61 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import RouteMap from "../components/RouteMap.jsx";
+import { generateDurationRoute } from "../services/api.js";
 
 export default function RecommendationPage2() {
   const nav = useNavigate();
   const location = useLocation();
-  const { durationType, currentLocation } = location.state || {};
+  const { recommendedPlace, userPreference, currentLocation } = location.state || {};
 
   const [routeData, setRouteData] = useState(null);
   const [error, setError] = useState(null);
+  const [actualDestination, setActualDestination] = useState(recommendedPlace);
 
-  // 시간대별 추천 경로 생성
+  // 시간대별 경로 생성
   useEffect(() => {
-    if (!durationType || !currentLocation) {
-      setError("시간대별 추천 정보 또는 현재 위치 정보가 없습니다.");
+    if (!recommendedPlace || !currentLocation || !userPreference) {
+      setError("추천 장소, 현재 위치, 또는 사용자 선호도 정보가 없습니다.");
       return;
     }
 
-    generateDurationBasedRoute();
-  }, [durationType, currentLocation]);
-
-  const generateDurationBasedRoute = async () => {
-    try {
-      // TODO: 시간대별 경로 추천 로직을 여기에 구현할 예정
-      // 현재는 기본 경로 생성 API 사용
-      const response = await fetch('http://localhost:5001/api/routes/recommend', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          start_lat: currentLocation.lat,
-          start_lon: currentLocation.lng,
-          duration_min: 60, // 기본값
-          mood: "활기찬"
-        })
-      });
-
-      const result = await response.json();
-      
-      if (result.success && result.geojson) {
-        setRouteData({
-          geojson: result.geojson,
-          description: result.description
+    const generateRoute = async () => {
+      try {
+        console.log("🚀 시간대별 경로 생성 시작:", {
+          startLat: currentLocation.lat,
+          startLon: currentLocation.lng,
+          userPreference
         });
-      } else {
-        setError(result.error || "경로 생성에 실패했습니다.");
+
+        const result = await generateDurationRoute(
+          currentLocation.lat,
+          currentLocation.lng,
+          userPreference
+        );
+
+        if (result.success) {
+          console.log("✅ 시간대별 경로 생성 성공:", result);
+          
+          // 실제 추천된 장소명 설정
+          const actualPlace = result.recommended_place?.name || recommendedPlace;
+          setActualDestination(actualPlace);
+          
+          setRouteData({
+            geojson: result.geojson,
+            description: result.description
+          });
+        } else {
+          console.error("❌ 시간대별 경로 생성 실패:", result.error);
+          setError(`경로 생성 실패: ${result.error}`);
+        }
+      } catch (error) {
+        console.error("💥 시간대별 경로 생성 오류:", error);
+        setError(`경로 생성 중 오류가 발생했습니다: ${error.message}`);
       }
-    } catch (error) {
-      console.error("경로 생성 중 오류:", error);
-      setError("경로 생성 중 오류가 발생했습니다.");
-    }
-  };
+    };
+
+    generateRoute();
+  }, [recommendedPlace, currentLocation, userPreference]);
 
   if (error) {
     return (
@@ -89,56 +93,35 @@ export default function RecommendationPage2() {
         <div style={{ marginTop: 20 }}>
           <h2 style={styles.subtitle}>🎯 시간대별 개인화 추천</h2>
           <p style={styles.text}>
-            추천 유형: {durationType === 'long' ? '긴 코스' : durationType === 'short' ? '짧은 코스' : '변주 코스'}
+            추천 장소: {actualDestination}
           </p>
         </div>
 
         {/* 지도 */}
         <div style={{ marginTop: 20 }}>
-          <h2 style={styles.subtitle}>🗺️ 추천 경로</h2>
+          <h2 style={styles.subtitle}>🗺️ 시간대별 추천 경로</h2>
           <div style={styles.mapContainer}>
             <div style={styles.mapHeader}>
               <p style={styles.mapTitle}>
-                {durationType === 'long' && "🌿 긴 코스로 색다른 여유를 느껴보세요!"}
-                {durationType === 'short' && "☀️ 짧고 산뜻한 산책으로 새로운 리듬을 느껴보세요!"}
-                {durationType === 'variation' && "🌸 새로운 산책 경험을 시작해보세요!"}
+                {actualDestination}까지의 시간대별 최적 경로
               </p>
             </div>
             <div style={styles.mapWrapper}>
               <RouteMap 
                 geojsonData={routeData?.geojson} 
                 startLocation={currentLocation}
-                destination="시간대별 추천 경로"
+                destination={actualDestination}
               />
             </div>
           </div>
         </div>
 
-        {/* 경로 정보 */}
-        {routeData?.geojson?.features?.[0]?.properties && (
-          <div style={{ marginTop: 20 }}>
-            <h2 style={styles.subtitle}>📊 경로 정보</h2>
-            <div style={styles.routeInfoContainer}>
-              <div style={styles.routeInfoItem}>
-                <span style={styles.routeInfoLabel}>총 거리:</span>
-                <span style={styles.routeInfoValue}>
-                  {routeData.geojson.features[0].properties.length_km} km
-                </span>
-              </div>
-              <div style={{...styles.routeInfoItem, borderBottom: "none"}}>
-                <span style={styles.routeInfoLabel}>예상 소요 시간:</span>
-                <span style={styles.routeInfoValue}>
-                  {routeData.geojson.features[0].properties.estimated_time_min}분
-                </span>
-              </div>
-            </div>
-          </div>
-        )}
+
 
         {/* 경로 설명 */}
         {routeData?.description && (
           <div style={{ marginTop: 20 }}>
-            <h2 style={styles.subtitle}>📝 경로 설명</h2>
+            <h2 style={styles.subtitle}>📝 추천 설명</h2>
             <p style={styles.text}>{routeData.description}</p>
           </div>
         )}
@@ -236,6 +219,40 @@ const styles = {
     fontSize: 18,
     color: "#3a893e",
     fontWeight: "bold",
+    fontFamily: "MyCustomFont",
+  },
+  featuresContainer: {
+    background: "rgba(255, 255, 255, 0.9)",
+    padding: 20,
+    borderRadius: 15,
+    border: "2px solid #e0e0e0",
+  },
+  featureItem: {
+    display: "flex",
+    alignItems: "flex-start",
+    padding: "15px 0",
+    borderBottom: "1px solid #f0f0f0",
+  },
+  featureIcon: {
+    fontSize: 24,
+    marginRight: 15,
+    marginTop: 2,
+  },
+  featureContent: {
+    flex: 1,
+  },
+  featureTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+    margin: "0 0 8px 0",
+    fontFamily: "MyCustomFont",
+  },
+  featureText: {
+    fontSize: 16,
+    color: "#666",
+    lineHeight: 1.5,
+    margin: 0,
     fontFamily: "MyCustomFont",
   }
 };

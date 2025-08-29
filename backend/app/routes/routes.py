@@ -9,6 +9,14 @@ import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'services', 'path_image'))
 from image_path_enhanced import generate_custom_route
 
+# 개인화 서비스 import
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'services', 'personalization'))
+from personalization import get_personalized_messages
+
+# 시간대별 경로 추천 서비스 import
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'services', 'personalization_duration'))
+from duration_route import generate_duration_based_route
+
 @api_bp.route('/health', methods=['GET'])
 def health_check():
     """헬스 체크 엔드포인트"""
@@ -89,6 +97,64 @@ def generate_music():
             
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@api_bp.route('/personalized-messages', methods=['POST'])
+def get_personalized_messages_api():
+    """사용자 기록을 받아서 개인화된 메시지 반환"""
+    try:
+        data = request.get_json()
+        user_history = data.get('user_history', [])
+        
+        print(f"🔍 API 요청 받음: {len(user_history)}개의 기록")
+        print(f"🔍 첫 번째 기록: {user_history[0] if user_history else 'None'}")
+        
+        # 개인화된 메시지 생성
+        result = get_personalized_messages(user_history)
+        
+        print(f"✅ API 응답: {result}")
+        return jsonify(result)
+        
+    except Exception as e:
+        print(f"💥 API 에러 발생: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            "success": False,
+            "messages": ["🌼 동대문구의 숨은 산책로를 찾아보아요!"],
+            "error": str(e)
+        }), 500
+
+@api_bp.route('/duration-route', methods=['POST'])
+def generate_duration_route():
+    """시간대별 개인화 경로 생성"""
+    try:
+        data = request.get_json()
+        start_lat = data.get('start_lat')
+        start_lon = data.get('start_lon')
+        user_preference = data.get('user_preference')  # 'short', 'medium', 'long'
+        
+        print(f"🔍 시간대별 경로 요청: lat={start_lat}, lon={start_lon}, preference={user_preference}")
+        
+        if not all([start_lat, start_lon, user_preference]):
+            return jsonify({
+                "success": False,
+                "error": "필수 파라미터가 누락되었습니다. (start_lat, start_lon, user_preference)"
+            }), 400
+        
+        # 시간대별 경로 생성
+        result = generate_duration_based_route(start_lat, start_lon, user_preference)
+        
+        print(f"✅ 시간대별 경로 생성 완료: {result}")
+        return jsonify(result)
+        
+    except Exception as e:
+        print(f"💥 시간대별 경로 생성 오류: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            "success": False,
+            "error": f"경로 생성 중 오류 발생: {str(e)}"
+        }), 500
 
 @api_bp.route('/music/<mood>', methods=['GET'])
 def get_music_by_mood(mood):
@@ -295,31 +361,7 @@ def get_statistics():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@api_bp.route('/personalization', methods=['POST'])
-def get_personalized_messages():
-    """개인화된 메시지 생성"""
-    try:
-        data = request.get_json()
-        user_history = data.get('user_history', [])
-        
-        # 개인화 모듈 import
-        import sys
-        sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'services', 'personalization'))
-        from personalization import get_personalized_messages
-        
-        # 개인화된 메시지 생성
-        result = get_personalized_messages(user_history)
-        
-        return jsonify(result)
-        
-    except Exception as e:
-        return jsonify({
-            "success": False,
-            "messages": [
-                "🌼 동대문구의 숨은 산책로를 찾아보아요!"
-            ],
-            "error": str(e)
-        }), 500
+
 
 @api_bp.route('/upload', methods=['POST'])
 def upload_image():

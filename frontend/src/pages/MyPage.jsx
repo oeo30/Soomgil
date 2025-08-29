@@ -12,7 +12,7 @@ export default function MyPage() {
 const [routes, setRoutes] = useState([]);
 
   useEffect(() => {
-    setRoutes(getRouteHistory());   // ✅ localStorage에서 불러오기
+    setRoutes(getRouteHistory());   // ✅ sessionStorage에서 불러오기
   }, []);
 
   // 총 산책 시간(분 단위 합산)
@@ -92,6 +92,8 @@ const [routes, setRoutes] = useState([]);
       {/* 산책 기록 */}
       <div style={{ marginTop: 40 }}>
         <h3 style={styles.subtitle}>🌳 나의 산책 기록</h3>
+        
+
 
         {/* 제목 줄 */}
         <div style={styles.recordHeader}>
@@ -102,8 +104,9 @@ const [routes, setRoutes] = useState([]);
         </div>
 <div style={styles.recordList}>
   {routes.length === 0 && (
-    <div style={{ padding: 12, textAlign: "center" }}>
-      아직 저장된 경로가 없습니다.
+    <div style={{ padding: 20, textAlign: "center", fontSize: 18, color: "#666" }}>
+      저장된 경로가 없습니다.<br />
+      산책 경로를 생성하고 저장해보세요!
     </div>
   )}
 

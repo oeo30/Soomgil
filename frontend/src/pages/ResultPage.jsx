@@ -87,7 +87,7 @@ const makeSummary = (txt, max = 110) =>
         startAddress: address,
         durationMin: duration,
         title: item.path_name,
-        summary,
+        summary: item.description_short || summary, // description_short 우선 사용
       });
 
       setSavedKeys(prev => new Set(prev).add(key));

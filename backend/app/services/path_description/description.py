@@ -43,6 +43,39 @@ def generate_path_description_gemini(path_name: str, weather: str, season: str, 
         print(f"Gemini API 호출 중 오류가 발생했습니다: {e}")
         return None
 
+def generate_path_description_short(path_name: str) -> str:
+    """짧은 경로 설명 생성"""
+    if not model:
+        return "경로 설명을 생성할 수 없습니다."
+    
+    prompt = f"""
+당신은 산책 경로 추천 서비스를 위한 카피라이터입니다. 
+입력으로 [장소명-유형]이 주어집니다.
+
+출력 규칙:
+- 공백 포함 20~25자
+- 따뜻하고 자연친화적인 어투
+- 실제 산책 느낌이 나도록 작성
+- 장소명을 반드시 포함
+- 한 줄로만 출력
+
+예시:
+입력: 배봉산-mountain
+출력: 배봉산 숲길 따라 걷는 여유 산책
+
+입력: 청계천-river
+출력: 청계천 물길 따라 도심 속 여유 산책
+
+입력: {path_name}
+출력:"""
+
+    try:
+        response = model.generate_content(prompt)
+        return response.text.strip()
+    except Exception as e:
+        print(f"짧은 설명 생성 중 오류가 발생했습니다: {e}")
+        return None
+
 # 프로젝트 루트 기준으로 절대 경로 사용
 print(f"🔍 프로젝트 루트: {project_root}")
 print(f"📁 현재 작업 디렉토리: {os.getcwd()}")
@@ -62,17 +95,28 @@ description_results = []
 for item in poi_tree_list:
     path_name = item[0] if item and isinstance(item[0], str) else "경로명 없음"
     trees = item[1] if len(item) > 1 else []
+    
+    # 긴 설명 생성
     description = generate_path_description_gemini(
         path_name=path_name.split("-")[0],
         weather=weather_info,
         season=season,
         trees=trees
     )
+    
+    # 짧은 설명 생성
+    description_short = generate_path_description_short(path_name)
+    
     print(f"--- {path_name} 설명 ---")
     if description:
-        print(description)
+        print(f"긴 설명: {description}")
     else:
         print("경로 설명 생성 실패")
+    
+    if description_short:
+        print(f"짧은 설명: {description_short}")
+    else:
+        print("짧은 설명 생성 실패")
     
     # 경로별 이모티콘 매칭
     emoji = ""  # 기본값 (이모티콘 없음)
@@ -89,7 +133,8 @@ for item in poi_tree_list:
     
     description_results.append({
         "path_name": display_name,
-        "description": description if description else "경로 설명 생성 실패"
+        "description": description if description else "경로 설명 생성 실패",
+        "description_short": description_short if description_short else "짧은 설명 생성 실패"
     })
 
 # 모든 경로 설명 결과를 json 파일로 저장

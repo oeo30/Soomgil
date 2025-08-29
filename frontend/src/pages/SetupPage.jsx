@@ -28,6 +28,30 @@ export default function SetupPage() {
   const mapDivRef = useRef(null);
   const boundaryLayerRef = useRef(null); // 동대문구 경계 레이어 저장
 
+  // 시간대별 선호도 분석 함수
+  const getDurationPreference = () => {
+    const userHistory = getRouteHistory();
+    if (!userHistory || userHistory.length === 0) {
+      return 'medium'; // 기본값
+    }
+
+    // 최근 5개 기록의 평균 산책 시간 계산
+    const recentHistory = userHistory.slice(0, 5);
+    const totalDuration = recentHistory.reduce((sum, record) => {
+      return sum + (record.durationMin || 30); // 기본값 30분
+    }, 0);
+    const avgDuration = totalDuration / recentHistory.length;
+
+    // 선호도 분류
+    if (avgDuration <= 30) {
+      return 'short';
+    } else if (avgDuration <= 90) {
+      return 'medium';
+    } else {
+      return 'long';
+    }
+  };
+
   // 개인화된 메시지 가져오기
   const fetchPersonalizedMessages = async () => {
     try {
@@ -342,7 +366,7 @@ fetch("https://nominatim.openstreetmap.org/search.php?q=동대문구&polygon_geo
             nav(targetPage, {
               state: {
                 recommendedPlace,
-                userPreference: null, // TODO: 실제 사용자 취향 정보 전달
+                userPreference: getDurationPreference(), // 시간대별 선호도 분석
                 currentLocation: startLocation || { lat: 37.5839, lng: 127.0559 }
               }
             });

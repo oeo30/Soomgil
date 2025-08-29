@@ -1,6 +1,7 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import RouteMap from "../components/RouteMap.jsx";
+import { generateDurationRoute } from "../services/api.js";
 
 export default function RecommendationPage2() {
   const nav = useNavigate();
@@ -10,19 +11,45 @@ export default function RecommendationPage2() {
   const [routeData, setRouteData] = useState(null);
   const [error, setError] = useState(null);
 
-  // 기본 지도 표시
+  // 시간대별 경로 생성
   useEffect(() => {
-    if (!recommendedPlace || !currentLocation) {
-      setError("추천 장소 또는 현재 위치 정보가 없습니다.");
+    if (!recommendedPlace || !currentLocation || !userPreference) {
+      setError("추천 장소, 현재 위치, 또는 사용자 선호도 정보가 없습니다.");
       return;
     }
 
-    // 기본 지도 데이터 설정
-    setRouteData({
-      geojson: null,
-      description: `${recommendedPlace}까지의 시간대별 최적 경로를 확인해보세요!`
-    });
-  }, [recommendedPlace, currentLocation]);
+    const generateRoute = async () => {
+      try {
+        console.log("🚀 시간대별 경로 생성 시작:", {
+          startLat: currentLocation.lat,
+          startLon: currentLocation.lng,
+          userPreference
+        });
+
+        const result = await generateDurationRoute(
+          currentLocation.lat,
+          currentLocation.lng,
+          userPreference
+        );
+
+        if (result.success) {
+          console.log("✅ 시간대별 경로 생성 성공:", result);
+          setRouteData({
+            geojson: result.geojson,
+            description: result.description
+          });
+        } else {
+          console.error("❌ 시간대별 경로 생성 실패:", result.error);
+          setError(`경로 생성 실패: ${result.error}`);
+        }
+      } catch (error) {
+        console.error("💥 시간대별 경로 생성 오류:", error);
+        setError(`경로 생성 중 오류가 발생했습니다: ${error.message}`);
+      }
+    };
+
+    generateRoute();
+  }, [recommendedPlace, currentLocation, userPreference]);
 
   if (error) {
     return (

@@ -13,6 +13,10 @@ from image_path_enhanced import generate_custom_route
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'services', 'personalization'))
 from personalization import get_personalized_messages
 
+# 시간대별 경로 추천 서비스 import
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'services', 'personalization_duration'))
+from duration_route import generate_duration_based_route
+
 @api_bp.route('/health', methods=['GET'])
 def health_check():
     """헬스 체크 엔드포인트"""
@@ -118,6 +122,38 @@ def get_personalized_messages_api():
             "success": False,
             "messages": ["🌼 동대문구의 숨은 산책로를 찾아보아요!"],
             "error": str(e)
+        }), 500
+
+@api_bp.route('/duration-route', methods=['POST'])
+def generate_duration_route():
+    """시간대별 개인화 경로 생성"""
+    try:
+        data = request.get_json()
+        start_lat = data.get('start_lat')
+        start_lon = data.get('start_lon')
+        user_preference = data.get('user_preference')  # 'short', 'medium', 'long'
+        
+        print(f"🔍 시간대별 경로 요청: lat={start_lat}, lon={start_lon}, preference={user_preference}")
+        
+        if not all([start_lat, start_lon, user_preference]):
+            return jsonify({
+                "success": False,
+                "error": "필수 파라미터가 누락되었습니다. (start_lat, start_lon, user_preference)"
+            }), 400
+        
+        # 시간대별 경로 생성
+        result = generate_duration_based_route(start_lat, start_lon, user_preference)
+        
+        print(f"✅ 시간대별 경로 생성 완료: {result}")
+        return jsonify(result)
+        
+    except Exception as e:
+        print(f"💥 시간대별 경로 생성 오류: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            "success": False,
+            "error": f"경로 생성 중 오류 발생: {str(e)}"
         }), 500
 
 @api_bp.route('/music/<mood>', methods=['GET'])

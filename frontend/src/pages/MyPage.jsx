@@ -99,9 +99,6 @@ export default function MyPage() {
 
         {/* 오른쪽 영역: 총 시간 + 스탬프판 + 배지 */}
         <div style={styles.rightSection}>
-          <span style={styles.totalTime}>
-            총 산책 시간: {formatTime(totalWalkTime)}
-          </span>
           <div style={styles.stampBoard}>
             {stampArray.map((item, idx) => (
               <div key={idx} style={styles.stampCell}>
@@ -113,6 +110,9 @@ export default function MyPage() {
               </div>
             ))}
           </div>
+          <span style={styles.totalTime}>
+            총 산책 시간: {formatTime(totalWalkTime)}
+          </span>
           <span style={styles.badge}>{badge}</span>
         </div>
       </div>
